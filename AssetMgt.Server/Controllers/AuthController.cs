@@ -1,60 +1,71 @@
 ﻿using AssetMgt.Server.DTOs;
-using Microsoft.AspNetCore.Identit
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using System.Security.Claims;
 using System.Text;
+using System.IdentityModel.Tokens.Jwt;
 
 namespace AssetMgt.Server.Controllers
 {
+    [ApiController]
+    [Route("api/[controller]")]
     public class AuthController: ControllerBase
     {
-        private readonly UserManager<ApplicationUser> _userManager
-        private readonly RoleManager<IdentityRole<Guid>> _roleManager
-    }
-    public AuthController(UserManager<ApplicationUser> userManager, RoleManager<IdentityRole<Guid>> roleManager)
+        private readonly UserManager<ApplicationUser> _userManager;
+        private readonly RoleManager<IdentityRole<Guid>> _roleManager;
+  
+    public AuthController(UserManager<ApplicationUser> userManager,
+                RoleManager<IdentityRole<Guid>> roleManager, IConfiguration config)
         {
             _userManager = userManager;
             _roleManager = roleManager;
+            _config = config;
         }
-        [HttpPost('register')]
+        [HttpPost("register")]
         public async Task<IActionResult> Register([FromBody] RegisterDto dto)
         {
-            var existigUser= await _userManager.FindByEmailAsync(dto.Email){
-                if(!existigUser==null)
-                return BadRequest('user already existed')
-            }
-            var user=new ApplicationUser{
-                username=dto.Email
-                Email=dto.Email
-        }
-            var result=await _userManager.CreateAsync(user,dto.Password)
-                if(!result)
+            var existigUser = await _userManager.FindByEmailAsync(dto.Email);
+            if (existigUser != null) 
+            {
+                return BadRequest("user already existed");
+                    }
+
+            var user = new ApplicationUser
+            {
+                UserName = dto.Email,
+                Email = dto.Email
+            };
+            var result = await _userManager.CreateAsync(user, dto.Password);
+                if (!result.Succeeded) 
+            {
                 return BadRequest(result.Errors.ToString());
+            }
                 if(!await _roleManager.RoleExistsAsync(dto.Role))
             {
-                await _roleManager.CreateAsync(new IdentityRole<Guid>( dto.Role))
+                await _roleManager.CreateAsync(new IdentityRole<Guid>(dto.Role));
             }
 
-                await _userManager.AddToRoleAsync(user,dto.Role)
-                return Ok('user successfully registered')
+            await _userManager.AddToRoleAsync(user, dto.Role);
+            return Ok("user successfully registered");
                 }
 
-        [HttpPost('login')]
+        [HttpPost("login")]
 
         public async Task<IActionResult> Login([FromBody] LoginRequestDto dto)
         {
-            var User=await _userManager.FindByEmailAsync(dto.Email)
-                if(User==null || !await _userManager.CheckPasswordAsync(dto.password)  
-                return Unauthorized('Bad email or Password')
-
-            var roles=await _userManager.GetRolesAsync(User)
+            var User = await _userManager.FindByEmailAsync(dto.Email);
+            if (User == null || !await _userManager.CheckPasswordAsync(user, dto.password))
+                {
+                return Unauthorized("Bad email or Password");
+                    }
+            var roles = await _userManager.GetRolesAsync(User);
             var role = roles.FirstOrDefault() ?? "User";
 
             var claims = new List<Claim>
     {
-        new Claim(JwtRegisteredClaimNames.Sub, user.Email),
-        new Claim("uid", user.Id.ToString()),
-        new Claim(ClaimTypes.Role, role)
+                new Claim(JwtRegisteredClaimNames.Sub, User.Email),
+                new Claim("uid", User.Id.ToString()),
+                new Claim(ClaimTypes.Role, role)
     };
 
           
@@ -75,9 +86,10 @@ namespace AssetMgt.Server.Controllers
             {
                 Token = new JwtSecurityTokenHandler().WriteToken(token),
                 Role = role,
-                Email = user.Email,
+                Email = User.Email,
                 Expires = expires
             });
         }
     }
 
+}

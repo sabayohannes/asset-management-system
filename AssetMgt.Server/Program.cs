@@ -1,4 +1,4 @@
-var builder = WebApplication.CreateBuilder(args);
+
 
 // Add services to the container.
 
@@ -11,7 +11,7 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
 
-
+var builder = WebApplication.CreateBuilder(args);
 
 // Add JWT Auth
 builder.Services.AddAuthentication(options =>
@@ -39,6 +39,7 @@ var app = builder.Build();
 app.UseDefaultFiles();
 app.UseStaticFiles();
 app.UseAuthentication();
+
 // Configure the HTTP request pipeline.
 
 app.UseHttpsRedirection();

@@ -1,8 +1,10 @@
 ﻿namespace AssetMgt.Server.DTOs
 {
-    public class LoginResponse
+    public class LoginResponseDto
     {
-        public string Token { get; set; }
-        public string Role { get; set; }
+        public string? Token { get; set; }
+        public string? Role { get; set; }
+        public string? Email { get; set; }
+       public string? Expires { get; set; }
     }
 }

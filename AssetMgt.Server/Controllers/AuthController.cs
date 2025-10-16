@@ -4,17 +4,27 @@ using Microsoft.AspNetCore.Mvc;
 using System.Security.Claims;
 using System.Text;
 using System.IdentityModel.Tokens.Jwt;
+using AssetMgt.Server.Models;
+using Microsoft.IdentityModel.Tokens;
+
+
+
+
 
 namespace AssetMgt.Server.Controllers
 {
+
+
     [ApiController]
     [Route("api/[controller]")]
-    public class AuthController: ControllerBase
+    public class AuthController : ControllerBase
     {
         private readonly UserManager<ApplicationUser> _userManager;
         private readonly RoleManager<IdentityRole<Guid>> _roleManager;
-  
-    public AuthController(UserManager<ApplicationUser> userManager,
+
+
+        private readonly IConfiguration _config;
+        public AuthController(UserManager<ApplicationUser> userManager,
                 RoleManager<IdentityRole<Guid>> roleManager, IConfiguration config)
         {
             _userManager = userManager;
@@ -24,11 +34,18 @@ namespace AssetMgt.Server.Controllers
         [HttpPost("register")]
         public async Task<IActionResult> Register([FromBody] RegisterDto dto)
         {
+            if (string.IsNullOrWhiteSpace(dto.Email))
+                return BadRequest("Email is required.");
+
+            if (string.IsNullOrWhiteSpace(dto.Password))
+                return BadRequest("Password is required.");
+            if (string.IsNullOrWhiteSpace(dto.Role))
+                return BadRequest("Role  is required.");
             var existigUser = await _userManager.FindByEmailAsync(dto.Email);
-            if (existigUser != null) 
+            if (existigUser != null)
             {
                 return BadRequest("user already existed");
-                    }
+            }
 
             var user = new ApplicationUser
             {
@@ -36,60 +53,77 @@ namespace AssetMgt.Server.Controllers
                 Email = dto.Email
             };
             var result = await _userManager.CreateAsync(user, dto.Password);
-                if (!result.Succeeded) 
+            if (!result.Succeeded)
             {
-                return BadRequest(result.Errors.ToString());
+                var errors = result.Errors.Select(e => e.Description).ToList();
+
+                // Return them as JSON (or plain text joined)
+                return BadRequest(new { Errors = errors });
             }
-                if(!await _roleManager.RoleExistsAsync(dto.Role))
+            if (!await _roleManager.RoleExistsAsync(dto.Role))
             {
                 await _roleManager.CreateAsync(new IdentityRole<Guid>(dto.Role));
             }
 
             await _userManager.AddToRoleAsync(user, dto.Role);
             return Ok("user successfully registered");
-                }
-
+        }
         [HttpPost("login")]
-
         public async Task<IActionResult> Login([FromBody] LoginRequestDto dto)
         {
-            var User = await _userManager.FindByEmailAsync(dto.Email);
-            if (User == null || !await _userManager.CheckPasswordAsync(user, dto.password))
-                {
-                return Unauthorized("Bad email or Password");
-                    }
-            var roles = await _userManager.GetRolesAsync(User);
+            if (string.IsNullOrWhiteSpace(dto.Email))
+                return BadRequest("Email is required.");
+
+            if (string.IsNullOrWhiteSpace(dto.Password))
+                return BadRequest("Password is required.");
+
+            var user = await _userManager.FindByEmailAsync(dto.Email);
+            if (user == null || !await _userManager.CheckPasswordAsync(user, dto.Password))
+            {
+                return Unauthorized("Bad email or password.");
+            }
+
+            var roles = await _userManager.GetRolesAsync(user);
             var role = roles.FirstOrDefault() ?? "User";
+
+            var jwtKey = _config["Jwt:Key"];
+            var jwtIssuer = _config["Jwt:Issuer"];
+            var jwtAudience = _config["Jwt:Audience"];
+
+            if (string.IsNullOrWhiteSpace(jwtKey) ||
+                string.IsNullOrWhiteSpace(jwtIssuer) ||
+                string.IsNullOrWhiteSpace(jwtAudience))
+            {
+                return StatusCode(500, "JWT configuration is missing in appsettings.json.");
+            }
 
             var claims = new List<Claim>
     {
-                new Claim(JwtRegisteredClaimNames.Sub, User.Email),
-                new Claim("uid", User.Id.ToString()),
-                new Claim(ClaimTypes.Role, role)
+        new Claim(JwtRegisteredClaimNames.Sub, user.Email ?? string.Empty),
+        new Claim("uid", user.Id.ToString()),
+        new Claim(ClaimTypes.Role, role)
     };
 
-          
-            var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_config["Jwt:Key"]));
+            var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtKey));
             var creds = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
             var expires = DateTime.UtcNow.AddHours(2);
 
             var token = new JwtSecurityToken(
-                issuer: _config["Jwt:Issuer"],
-                audience: _config["Jwt:Audience"],
+                issuer: jwtIssuer,
+                audience: jwtAudience,
                 claims: claims,
                 expires: expires,
                 signingCredentials: creds
             );
 
-           
             return Ok(new LoginResponseDto
             {
                 Token = new JwtSecurityTokenHandler().WriteToken(token),
-                Role = role,
-                Email = User.Email,
-                Expires = expires
+                Role = role, // ✅ use role from GetRolesAsync
+                Email = user.Email,
+                Expires = expires.ToString("o")
             });
         }
-    }
 
+    }
 }

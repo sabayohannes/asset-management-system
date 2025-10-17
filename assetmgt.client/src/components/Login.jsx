@@ -19,9 +19,11 @@ const handleClick = async() => {
         const res = await axios.post('http://localhost:5001/api/auth/login', form)
         setToken(res.data.token)
         setError('')
+        navigate("/AddAsset")
     } catch (err) {
         setError('invalid password or username')
         setToken('');
+       
         console.log({ err })
         if (err.response && err.response.status === (401)) {
             setError('User not registered or invalid credentials');

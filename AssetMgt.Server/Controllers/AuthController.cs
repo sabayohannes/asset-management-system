@@ -11,8 +11,8 @@ using Microsoft.IdentityModel.Tokens;
 
 
 
-namespace AssetMgt.Server.Controllers
-{
+namespace AssetMgt.Server.Controllers;
+
 
 
     [ApiController]
@@ -126,4 +126,3 @@ namespace AssetMgt.Server.Controllers
         }
 
     }
-}

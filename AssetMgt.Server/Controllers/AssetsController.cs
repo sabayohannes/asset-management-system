@@ -5,21 +5,23 @@ using AssetMgt.Server.Models;
 using AssetMgt.Server.DTOs;
 using AssetMgt.Server.Data;
 
+
 namespace AssetMgt.Server.Controllers
+
 {
     [ApiController]
     [Route("api/[controller]")]
     public class AssetsController : ControllerBase
     {
-        private readonly AppDbContext _context;
-       public AssetsController(AppDbContext context) {
+        private readonly ApplicationDbContext _context;
+       public AssetsController(ApplicationDbContext context) {
             _context = context;
         }
 
-        [HttpPost]
+        [HttpPost("assetregister")]
         [Authorize(Roles = "Admin")]
 
-        public async Task<IActionResult> CreateAsset([FromBody] AssetCreateDto assetDto)
+        public async Task<IActionResult> CreateAsset([FromBody] AssetDto assetDto)
         {
             var existing = await _context.Assets.FirstOrDefaultAsync(a => a.SerialNumber == assetDto.SerialNumber);
                 if (existing != null)

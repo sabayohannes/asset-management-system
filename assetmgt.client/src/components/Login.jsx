@@ -3,6 +3,7 @@ import { Box, Button, Typography, TextField, Container } from '@mui/material'
 import axios from 'axios'
 import {useNavigate } from 'react-router-dom'
 
+
 const LoginPage = () => {
     const [form, setForm] = useState({
         "email": "",
@@ -17,9 +18,24 @@ const LoginPage = () => {
 const handleClick = async() => {
     try{
         const res = await axios.post('http://localhost:5001/api/auth/login', form)
+        console.log("login response", res.data)
+        
         setToken(res.data.token)
         setError('')
-        navigate("/AddAsset")
+        const token = res.data.token;
+        const role = res.data.role;
+        const payload = JSON.parse(atob(token.split('.')[1]))
+        const userId = payload.uid;
+        localStorage.setItem("token", token)
+        localStorage.setItem("userId", userId)
+        localStorage.setItem("role", role)
+        if (role === "Admin") {
+            navigate("/admindashboard")
+        } else {
+            navigate("/assetrequest"); 
+        }
+
+     
     } catch (err) {
         setError('invalid password or username')
         setToken('');

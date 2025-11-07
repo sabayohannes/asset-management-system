@@ -18,6 +18,13 @@ namespace AssetMgt.Server.Controllers
             _context = context;
         }
 
+        [HttpGet]
+        [Authorize(Roles = "Admin")]
+        public async Task<IActionResult> GetAllAssets() {
+            var assets = await _context.Assets.ToListAsync();
+            return Ok(assets);
+        }
+
         [HttpPost("assetregister")]
         [Authorize(Roles = "Admin")]
 
@@ -28,13 +35,16 @@ namespace AssetMgt.Server.Controllers
             {
                 return Conflict("asset with the same serial number already exist");
             }
+            var purchaseDate = assetDto.PurchaseDate.Kind == DateTimeKind.Utc
+              ? assetDto.PurchaseDate
+              : assetDto.PurchaseDate.ToUniversalTime();
             var asset = new Asset
             {
 
                 Name = assetDto.Name,
                 Category = assetDto.Category,
                 SerialNumber = assetDto.SerialNumber,
-                PurchaseDate = assetDto.PurchaseDate,
+                PurchaseDate = purchaseDate,
                 Status = "Available"
 
             };

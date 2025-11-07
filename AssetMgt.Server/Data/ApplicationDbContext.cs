@@ -17,6 +17,7 @@ namespace AssetMgt.Server.Data
 
 
         public DbSet<Asset> Assets { get; set; }
+        public DbSet<AssetRequest> AssetRequests { get; set; }
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             base.OnModelCreating(modelBuilder);

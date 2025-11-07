@@ -27,9 +27,9 @@ export default function AddAsset() {
 
         try {
             const token = localStorage.getItem('token');
-
+            console.log("Token from localStorage:", token);
             const response = await axios.post(
-                'http://localhost:5001/api/auth/assetregister', 
+                'http://localhost:5001/api/assets/assetregister', 
                 formData,
                 {
                     headers: {
@@ -51,7 +51,7 @@ export default function AddAsset() {
     };
 
     return (
-        <Box maxWidth={400} mx="auto" mt={5} backgroundColor="#f5f5f5">
+        <Box maxWidth={400} mx="auto" mt={5} sx={{ backgroundColor :"#f5f5f5" }} >
             <Typography variant="h5" mb={3}>Add New Asset</Typography>
             <form onSubmit={handleSubmit}>
                 <TextField

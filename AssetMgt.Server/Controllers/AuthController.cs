@@ -121,6 +121,7 @@ namespace AssetMgt.Server.Controllers;
                 Token = new JwtSecurityTokenHandler().WriteToken(token),
                 Role = role, // ✅ use role from GetRolesAsync
                 Email = user.Email,
+                UserId = user.Id,
                 Expires = expires.ToString("o")
             });
         }

@@ -8,4 +8,17 @@
     <!-- Folder where production build objects will be placed -->
     <BuildOutputFolder>$(MSBuildProjectDirectory)\dist</BuildOutputFolder>
   </PropertyGroup>
+  <ItemGroup>
+    <Folder Include="src\layout\Customization\" />
+    <Folder Include="src\layout\MainLayout\Header\SearchSection\" />
+    <Folder Include="src\layout\MainLayout\Header\ProfileSection\" />
+    <Folder Include="src\layout\MainLayout\Header\NotificationSection\" />
+    <Folder Include="src\layout\MainLayout\LogoSection\" />
+    <Folder Include="src\layout\MainLayout\MenuList\NavCollapse\" />
+    <Folder Include="src\layout\MainLayout\MenuList\NavGroup\" />
+    <Folder Include="src\layout\MainLayout\MenuList\NavItem\" />
+    <Folder Include="src\layout\MainLayout\Sidebar\MenuCard\" />
+    <Folder Include="src\layout\MinimalLayout\" />
+    <Folder Include="src\ui-component\cards\Skeleton\" />
+  </ItemGroup>
 </Project>

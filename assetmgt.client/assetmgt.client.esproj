@@ -1,4 +1,4 @@
-<Project Sdk="Microsoft.VisualStudio.JavaScript.Sdk/1.0.2752196">
+﻿<Project Sdk="Microsoft.VisualStudio.JavaScript.Sdk/1.0.2752196">
   <PropertyGroup>
     <StartupCommand>npm run dev</StartupCommand>
     <JavaScriptTestRoot>src\</JavaScriptTestRoot>
@@ -9,16 +9,13 @@
     <BuildOutputFolder>$(MSBuildProjectDirectory)\dist</BuildOutputFolder>
   </PropertyGroup>
   <ItemGroup>
-    <Folder Include="src\layout\Customization\" />
-    <Folder Include="src\layout\MainLayout\Header\SearchSection\" />
-    <Folder Include="src\layout\MainLayout\Header\ProfileSection\" />
-    <Folder Include="src\layout\MainLayout\Header\NotificationSection\" />
-    <Folder Include="src\layout\MainLayout\LogoSection\" />
-    <Folder Include="src\layout\MainLayout\MenuList\NavCollapse\" />
-    <Folder Include="src\layout\MainLayout\MenuList\NavGroup\" />
-    <Folder Include="src\layout\MainLayout\MenuList\NavItem\" />
-    <Folder Include="src\layout\MainLayout\Sidebar\MenuCard\" />
-    <Folder Include="src\layout\MinimalLayout\" />
-    <Folder Include="src\ui-component\cards\Skeleton\" />
+    <None Remove="src\layout\Customization\**" />
+    <None Remove="src\layout\MainLayout\**" />
+    <None Remove="src\layout\MinimalLayout\**" />
+    <None Remove="src\ui-component\**" />
+    <TypeScriptConfiguration Remove="src\layout\Customization\**" />
+    <TypeScriptConfiguration Remove="src\layout\MainLayout\**" />
+    <TypeScriptConfiguration Remove="src\layout\MinimalLayout\**" />
+    <TypeScriptConfiguration Remove="src\ui-component\**" />
   </ItemGroup>
 </Project>

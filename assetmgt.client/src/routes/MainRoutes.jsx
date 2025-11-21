@@ -1,56 +1,44 @@
 import { lazy } from 'react';
 
 // project imports
-import MainLayout from '../layout/MainLayout';
-import Loadable from 'uiComponent/Loadable';
+import Loadable from 'components/Loadable';
+import DashboardLayout from 'layout/Dashboard';
 
-// dashboard routing
-const DashboardDefault = Loadable(lazy(() => import('../views/dashboard/Default')));
+const DashboardDefault = Loadable(lazy(() => import('pages/dashboard/default')));
 
-// utilities routing
-const UtilsTypography = Loadable(lazy(() => import('../views/utilities/Typography')));
-const UtilsColor = Loadable(lazy(() => import('../views/utilities/Color')));
-const UtilsShadow = Loadable(lazy(() => import('../views/utilities/Shadow')));
 
-// sample page routing
-const SamplePage = Loadable(lazy(() => import('../views/sample-page')));
+//const UserDashboard = Loadable(lazy(() => import('pages/user/UserDashboard')));
+
+// other pages
+const Color = Loadable(lazy(() => import('pages/component-overview/color')));
+const Typography = Loadable(lazy(() => import('pages/component-overview/typography')));
+const Shadow = Loadable(lazy(() => import('pages/component-overview/shadows')));
+const SamplePage = Loadable(lazy(() => import('pages/extra-pages/sample-page')));
 
 // ==============================|| MAIN ROUTING ||============================== //
 
 const MainRoutes = {
-  path: '/',
-  element: <MainLayout />,
-  children: [
-    {
-      path: '/',
-      element: <DashboardDefault />
-    },
-    {
-      path: 'dashboard',
-      children: [
+    path: '/',
+    element: <DashboardLayout />,
+    children: [
+       
         {
-          path: 'default',
-          element: <DashboardDefault />
-        }
-      ]
-    },
-    {
-      path: 'typography',
-      element: <UtilsTypography />
-    },
-    {
-      path: 'color',
-      element: <UtilsColor />
-    },
-    {
-      path: 'shadow',
-      element: <UtilsShadow />
-    },
-    {
-      path: '/sample-page',
-      element: <SamplePage />
-    }
-  ]
+            path: 'admindashboard',
+            element: <DashboardDefault />
+        },
+
+        // USER DASHBOARD (optional)
+        //{
+           // path: 'userdashboard',
+            //element: <UserDashboard />
+       // },
+
+        // other routes
+        { path: 'typography', element: <Typography /> },
+        { path: 'color', element: <Color /> },
+        { path: 'shadow', element: <Shadow /> },
+        { path: 'sample-page', element: <SamplePage /> }
+    ]
 };
 
 export default MainRoutes;

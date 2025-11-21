@@ -1,50 +1,78 @@
 {
-  "name": "assetmgt.client",
-  "private": true,
-  "version": "0.0.0",
-  "type": "module",
+  "name": "mantis-material-free-react",
+  "version": "4.0.0",
+  "homepage": "https://mantisdashboard.com/free",
+  "author": {
+    "name": "CodedThemes",
+    "email": "codedthemes@gmail.com",
+    "url": "https://codedthemes.com/"
+  },
   "scripts": {
-    "dev": "vite",
+    "start": "vite",
     "build": "vite build",
-    "lint": "eslint .",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "lint": "eslint \"src/**/*.{js,jsx,ts,tsx}\"",
+    "lint:fix": "eslint --fix \"src/**/*.{js,jsx,ts,tsx}\"",
+    "prettier": "prettier --write \"src/**/*.{js,jsx,ts,tsx}\""
   },
   "dependencies": {
-    "@emotion/react": "^11.14.0",
-    "@emotion/styled": "^11.14.1",
-    "@fontsource/inter": "^5.2.8",
-    "@fontsource/poppins": "^5.2.7",
-    "@fontsource/roboto": "^5.2.8",
-    "@mui/icons-material": "^7.3.4",
-    "@mui/material": "^7.3.4",
-    "@tabler/icons-react": "^3.35.0",
-    "apexcharts": "^5.3.6",
-    "axios": "^1.12.2",
-    "framer-motion": "^12.23.24",
-    "lodash-es": "^4.17.21",
-    "material-ui-popup-state": "^5.3.6",
-    "react": "^19.1.1",
-    "react-apexcharts": "^1.8.0",
-    "react-device-detect": "^2.2.3",
-    "react-dom": "^19.1.1",
-    "react-router-dom": "^7.9.4",
-    "simplebar-react": "^3.3.2",
-    "slick-carousel": "^1.8.1",
-    "swr": "^2.3.6",
-    "vite-jsconfig-paths": "^2.0.1",
-    "web-vitals": "^5.1.0",
-    "yup": "^1.7.1"
+    "@ant-design/colors": "7.2.1",
+    "@ant-design/icons": "6.1.0",
+    "@emotion/cache": "11.14.0",
+    "@emotion/react": "11.14.0",
+    "@emotion/styled": "11.14.1",
+    "@fontsource/public-sans": "^5.2.7",
+    "@mui/base": "5.0.0-beta.70",
+    "@mui/lab": "7.0.1-beta.18",
+    "@mui/material": "7.3.4",
+    "@mui/system": "7.3.3",
+    "@mui/x-charts": "8.14.0",
+    "@vitejs/plugin-react": "5.0.4",
+    "formik": "2.4.6",
+    "framer-motion": "12.23.24",
+    "lodash-es": "4.17.21",
+    "react": "19.2.0",
+    "react-device-detect": "2.2.3",
+    "react-dom": "19.2.0",
+    "react-number-format": "5.4.4",
+    "react-router": "7.9.4",
+    "react-router-dom": "7.9.4",
+    "simplebar-react": "3.3.2",
+    "swr": "2.3.6",
+    "vite": "7.1.9",
+    "vite-jsconfig-paths": "2.0.1",
+    "web-vitals": "5.1.0",
+    "yup": "1.7.1"
+  },
+  "eslintConfig": {
+    "extends": [
+      "react-app",
+      "react-app/jest"
+    ]
+  },
+  "browserslist": {
+    "production": [
+      ">0.2%",
+      "not dead",
+      "not op_mini all"
+    ],
+    "development": [
+      "last 1 chrome version",
+      "last 1 firefox version",
+      "last 1 safari version"
+    ]
   },
   "devDependencies": {
-    "@eslint/js": "^9.36.0",
-    "@types/react": "^19.1.13",
-    "@types/react-dom": "^19.1.9",
-    "@vitejs/plugin-react": "^5.0.3",
-    "eslint": "^9.36.0",
-    "eslint-plugin-react-hooks": "^5.2.0",
-    "eslint-plugin-react-refresh": "^0.4.20",
-    "globals": "^16.4.0",
-    "sass-embedded": "^1.93.3",
-    "vite": "^7.1.7"
-  }
+    "@eslint/compat": "1.4.0",
+    "@eslint/eslintrc": "3.3.1",
+    "@eslint/js": "9.37.0",
+    "eslint": "9.37.0",
+    "eslint-config-prettier": "10.1.2",
+    "eslint-plugin-jsx-a11y": "6.10.2",
+    "eslint-plugin-prettier": "5.5.4",
+    "eslint-plugin-react": "7.37.5",
+    "eslint-plugin-react-hooks": "7.0.0",
+    "prettier": "3.6.2"
+  },
+  "packageManager": "yarn@4.10.3"
 }

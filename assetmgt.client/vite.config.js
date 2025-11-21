@@ -1,27 +1,28 @@
-import { defineConfig } from 'vite'
-import react from '@vitejs/plugin-react'
-import path from 'path'
-import { fileURLToPath } from 'url'
+import { defineConfig } from 'vite';
+import react from '@vitejs/plugin-react';
+import path from 'path';
+import { fileURLToPath } from 'url';
 
-// Fix for __dirname in ESM
-const __filename = fileURLToPath(import.meta.url)
-const __dirname = path.dirname(__filename)
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 export default defineConfig({
     plugins: [react()],
     resolve: {
         alias: {
-            config: path.resolve(__dirname, 'src/config'),
+            components: path.resolve(__dirname, 'src/components'),
+            pages: path.resolve(__dirname, 'src/pages'),
+            contexts: path.resolve(__dirname, 'src/contexts'),
+            api: path.resolve(__dirname, 'src/api'),
+            'menu-items': path.resolve(__dirname, 'src/menu-items'),
             hooks: path.resolve(__dirname, 'src/hooks'),
-            layout: path.resolve(__dirname, 'src/layout'),
-            menu: path.resolve(__dirname, 'src/menu-items'),
-            routes: path.resolve(__dirname, 'src/routes'),
-            store: path.resolve(__dirname, 'src/store'),
             themes: path.resolve(__dirname, 'src/themes'),
-            uiComponent : path.resolve(__dirname, 'src/ui-component'),
+            layout: path.resolve(__dirname, 'src/layout'),
+            routes: path.resolve(__dirname, 'src/routes'),
+            config: path.resolve(__dirname, 'src/config.js'),
             utils: path.resolve(__dirname, 'src/utils'),
             assets: path.resolve(__dirname, 'src/assets'),
-            menuItems: path.resolve(__dirname, 'src/menu-items') 
+            sections: path.resolve(__dirname, 'src/sections')
         }
     }
-})
+});

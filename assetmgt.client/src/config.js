@@ -1,11 +1,12 @@
-export const DASHBOARD_PATH = '/sample-page';
-export const DEFAULT_THEME_MODE = 'system';
+// ==============================|| THEME CONSTANT ||============================== //
 
-export const CSS_VAR_PREFIX = '';
+export const APP_DEFAULT_PATH = '/dashboard/default';
+export const DRAWER_WIDTH = 260;
+export const MINI_DRAWER_WIDTH = 60;
+
 
 const config = {
-  fontFamily: `'Roboto', sans-serif`,
-  borderRadius: 8
+  fontFamily: `'Public Sans', sans-serif`
 };
 
 export default config;

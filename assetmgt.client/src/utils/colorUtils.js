@@ -1,6 +1,8 @@
 // material-ui
 import { alpha } from '@mui/material/styles';
 
+// ==============================|| CUSTOM FUNCTION - WITH ALPHA ||============================== //
+
 /**
  * Converts a hex color string to an RGB channel string ("r g b").
  *

@@ -1,59 +1,57 @@
-// third party
+// third-party
 import { merge } from 'lodash-es';
 
 // project imports
-import Alert from './Alert';
-import Avatar from './Avatar';
+import Badge from './Badge';
 import Button from './Button';
-import CardActions from './CardActions';
+import ButtonBase from './ButtonBase';
 import CardContent from './CardContent';
-import CardHeader from './CardHeader';
 import Checkbox from './Checkbox';
 import Chip from './Chip';
-import DataGrid from './DataGrid';
-import DatePicker from './DatePicker';
-import Divider from './Divider';
-import DateTimePickerToolbar from './DateTimePickerToolbar';
-import Dialog from './Dialog';
-import DialogTitle from './DialogTitle';
-import InputBase from './InputBase';
+import Drawer from './Drawer';
+import FormHelperText from './FormHelperText';
+import IconButton from './IconButton';
+import InputLabel from './InputLabel';
+import LinearProgress from './LinearProgress';
+import Link from './Link';
 import ListItemButton from './ListItemButton';
 import ListItemIcon from './ListItemIcon';
-import ListItemText from './ListItemText';
-import Paper from './Paper';
-import Select from './Select';
-import Slider from './Slider';
+import OutlinedInput from './OutlinedInput';
+import Tab from './Tab';
+import TableBody from './TableBody';
 import TableCell from './TableCell';
+import TableHead from './TableHead';
+import TableRow from './TableRow';
 import Tabs from './Tabs';
+import Tooltip from './Tooltip';
 import Typography from './Typography';
 
-// ===============================||  OVERRIDES - MAIN  ||=============================== //
+// ==============================|| OVERRIDES - MAIN ||============================== //
 
-export default function ComponentsOverrides(theme, borderRadius, outlinedFilled) {
+export default function ComponentsOverrides(theme) {
   return merge(
-    Alert(theme),
-    Avatar(theme),
+    Badge(theme),
     Button(theme),
-    CardActions,
+    ButtonBase(),
     CardContent(),
-    CardHeader(theme),
-    Checkbox(),
+    Checkbox(theme),
     Chip(theme),
-    DataGrid(theme),
-    DatePicker(),
-    DateTimePickerToolbar(),
-    Dialog(),
-    DialogTitle(),
-    Divider(theme),
-    InputBase(theme),
+    Drawer(),
+    FormHelperText(),
+    IconButton(theme),
+    InputLabel(theme),
+    LinearProgress(),
+    Link(),
     ListItemButton(theme),
     ListItemIcon(theme),
-    ListItemText(theme),
-    Paper(borderRadius),
-    Select(),
-    Slider(theme),
+    OutlinedInput(theme),
+    Tab(theme),
+    TableBody(theme),
     TableCell(theme),
-    Tabs(theme),
-    Typography(theme)
+    TableHead(theme),
+    TableRow(),
+    Tabs(),
+    Tooltip(theme),
+    Typography()
   );
 }

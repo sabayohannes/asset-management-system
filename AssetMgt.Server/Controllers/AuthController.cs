@@ -101,7 +101,8 @@ namespace AssetMgt.Server.Controllers;
     {
         new Claim(JwtRegisteredClaimNames.Sub, user.Email ?? string.Empty),
         new Claim("uid", user.Id.ToString()),
-        new Claim(ClaimTypes.Role, role)
+        new Claim(ClaimTypes.Role, role),
+        new Claim("role", role)
     };
 
             var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtKey));

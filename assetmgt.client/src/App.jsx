@@ -1,22 +1,19 @@
 import { RouterProvider } from 'react-router-dom';
-import './App.css';
 
-// Berry imports
-import ThemeCustomization from './themes';
-import NavigationScroll from './layout/NavigationScroll';
-import { ConfigProvider } from './contexts/ConfigContext';
-import router from './routes'; // Berry router
+// project imports
+import router from 'routes';
+import ThemeCustomization from 'themes';
 
-// ==============================|| APP ||============================== //
+import ScrollTop from 'components/ScrollTop';
+
+// ==============================|| APP - THEME, ROUTER, LOCAL ||============================== //
 
 export default function App() {
-    return (
-        <ConfigProvider>
-            <ThemeCustomization>
-                <NavigationScroll>
-                    <RouterProvider router={router} />
-                </NavigationScroll>
-            </ThemeCustomization>
-        </ConfigProvider>
-    );
+  return (
+    <ThemeCustomization>
+      <ScrollTop>
+        <RouterProvider router={router} />
+      </ScrollTop>
+    </ThemeCustomization>
+  );
 }

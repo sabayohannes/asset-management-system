@@ -2,38 +2,42 @@ import PropTypes from 'prop-types';
 import { useMemo } from 'react';
 
 // material-ui
-import { createTheme, ThemeProvider, StyledEngineProvider } from '@mui/material/styles';
+import { createTheme, StyledEngineProvider, ThemeProvider } from '@mui/material/styles';
 import CssBaseline from '@mui/material/CssBaseline';
 
 // project imports
-import { CSS_VAR_PREFIX, DEFAULT_THEME_MODE } from '../config';
-import CustomShadows from './custom-shadows';
 import useConfig from 'hooks/useConfig';
+import CustomShadows from './custom-shadows';
+import componentsOverride from './overrides';
 import { buildPalette } from './palette';
 import Typography from './typography';
-import componentsOverrides from './overrides';
 
 // ==============================|| DEFAULT THEME - MAIN ||============================== //
 
 export default function ThemeCustomization({ children }) {
-  const {
-    state: { borderRadius, fontFamily, outlinedFilled, presetColor }
-  } = useConfig();
+  const { state } = useConfig();
 
-  const palette = useMemo(() => buildPalette(presetColor), [presetColor]);
+  const themeTypography = useMemo(() => Typography(state.fontFamily), [state.fontFamily]);
 
-  const themeTypography = useMemo(() => Typography(fontFamily), [fontFamily]);
+  const palette = useMemo(() => buildPalette(state.presetColor), [state.presetColor]);
 
   const themeOptions = useMemo(
     () => ({
+      breakpoints: {
+        values: {
+          xs: 0,
+          sm: 768,
+          md: 1024,
+          lg: 1266,
+          xl: 1440
+        }
+      },
       direction: 'ltr',
       mixins: {
         toolbar: {
-          minHeight: '48px',
-          padding: '16px',
-          '@media (min-width: 600px)': {
-            minHeight: '48px'
-          }
+          minHeight: 60,
+          paddingTop: 8,
+          paddingBottom: 8
         }
       },
       typography: themeTypography,
@@ -44,7 +48,7 @@ export default function ThemeCustomization({ children }) {
         }
       },
       cssVariables: {
-        cssVarPrefix: CSS_VAR_PREFIX,
+        cssVarPrefix: '',
         colorSchemeSelector: 'data-color-scheme'
       }
     }),
@@ -52,11 +56,11 @@ export default function ThemeCustomization({ children }) {
   );
 
   const themes = createTheme(themeOptions);
-  themes.components = useMemo(() => componentsOverrides(themes, borderRadius, outlinedFilled), [themes, borderRadius, outlinedFilled]);
+  themes.components = componentsOverride(themes);
 
   return (
     <StyledEngineProvider injectFirst>
-      <ThemeProvider disableTransitionOnChange theme={themes} modeStorageKey="theme-mode" defaultMode={DEFAULT_THEME_MODE}>
+      <ThemeProvider disableTransitionOnChange theme={themes} modeStorageKey="theme-mode" defaultMode='light'>
         <CssBaseline enableColorScheme />
         {children}
       </ThemeProvider>

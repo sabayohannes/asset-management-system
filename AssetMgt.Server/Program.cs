@@ -8,6 +8,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.AspNetCore.Identity;
 using AssetMgt.Server.Models;
 using AssetMgt.Server.Data;
+using System.Security.Claims;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -61,7 +62,8 @@ builder.Services.AddAuthentication(options =>
         ValidateIssuerSigningKey = true,
         ValidIssuer = jwtConfig["Issuer"],
         ValidAudience = jwtConfig["Audience"],
-        IssuerSigningKey = new SymmetricSecurityKey(keyBytes)
+        IssuerSigningKey = new SymmetricSecurityKey(keyBytes),
+        RoleClaimType = ClaimTypes.Role
     };
 });
 
@@ -83,4 +85,5 @@ app.MapControllers();
 app.MapFallbackToFile("/index.html");
 
 app.Run();
-
+Console.WriteLine("Issuer: " + builder.Configuration["Jwt:Issuer"]);
+Console.WriteLine("Audience: " + builder.Configuration["Jwt:Audience"]);

@@ -1,53 +1,31 @@
-import { useState } from 'react';
+import { Box, Modal, Fade, Backdrop } from '@mui/material';
 
-// material-ui
-import Button from '@mui/material/Button';
-import Grid from '@mui/material/Grid';
-import Stack from '@mui/material/Stack';
-import Typography from '@mui/material/Typography';
-import Box from '@mui/material/Box';
-
-// project imports
-import MainCard from 'components/MainCard';
-import IncomeAreaChart from './IncomeAreaChart';
-
-// ==============================|| DEFAULT - UNIQUE VISITOR ||============================== //
-
-export default function UniqueVisitorCard() {
-  const [view, setView] = useState('monthly'); // 'monthly' or 'weekly'
-
-  return (
-    <>
-      <Grid container sx={{ justifyContent: 'space-between', alignItems: 'center' }}>
-        <Grid>
-          <Typography variant="h5">Unique Visitor</Typography>
-        </Grid>
-        <Grid>
-          <Stack direction="row" sx={{ alignItems: 'center' }}>
-            <Button
-              size="small"
-              onClick={() => setView('monthly')}
-              color={view === 'monthly' ? 'primary' : 'secondary'}
-              variant={view === 'monthly' ? 'outlined' : 'text'}
-            >
-              Month
-            </Button>
-            <Button
-              size="small"
-              onClick={() => setView('weekly')}
-              color={view === 'weekly' ? 'primary' : 'secondary'}
-              variant={view === 'weekly' ? 'outlined' : 'text'}
-            >
-              Week
-            </Button>
-          </Stack>
-        </Grid>
-      </Grid>
-      <MainCard content={false} sx={{ mt: 1.5 }}>
-        <Box sx={{ pt: 1, pr: 2 }}>
-          <IncomeAreaChart view={view} />
-        </Box>
-      </MainCard>
-    </>
-  );
+export default function UniqueVisitorCard({ open, onClose, children }) {
+    return (
+        <Modal
+            open={open}
+            onClose={onClose}
+            closeAfterTransition
+            BackdropComponent={Backdrop}
+            BackdropProps={{ timeout: 500 }}
+        >
+            <Fade in={open}>
+                <Box
+                    sx={{
+                        position: 'absolute',
+                        top: '50%',
+                        left: '50%',
+                        transform: 'translate(-50%, -50%)',
+                        width: 600,
+                        bgcolor: 'background.paper',
+                        borderRadius: 2,
+                        boxShadow: 24,
+                        p: 4,
+                    }}
+                >
+                    {children}   {/* <-- your AssetForm goes here */}
+                </Box>
+            </Fade>
+        </Modal>
+    );
 }

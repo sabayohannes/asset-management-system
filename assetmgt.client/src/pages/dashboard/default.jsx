@@ -17,6 +17,9 @@ import Stack from '@mui/material/Stack';
 import Typography from '@mui/material/Typography';
 import Box from '@mui/material/Box';
 
+import LinearProgress from '@mui/material/LinearProgress';
+import CircleIcon from '@mui/icons-material/Circle';
+
 // project imports
 import MainCard from 'components/MainCard';
 import AnalyticEcommerce from 'components/cards/statistics/AnalyticEcommerce';
@@ -36,6 +39,7 @@ import avatar1 from 'assets/images/users/avatar-1.png';
 import avatar2 from 'assets/images/users/avatar-2.png';
 import avatar3 from 'assets/images/users/avatar-3.png';
 import avatar4 from 'assets/images/users/avatar-4.png';
+import AssetForm from '../../sections/dashboard/default/AssetForm';
 //import axios from '../../../../../../../node_modules/axios/index';
 
 // avatar style
@@ -61,12 +65,78 @@ export default function DashboardDefault() {
   const [orderMenuAnchor, setOrderMenuAnchor] = useState(null);
   const [analyticsMenuAnchor, setAnalyticsMenuAnchor] = useState(null);
     const [assets, setAssets] = useState([])
+    const [openFormModal, setOpenFormModal] = useState(false);
+    const [assetRequests, setAssetRequests] = useState([]);
+    const [selectedAsset, setSelectedAsset] = useState(null);
+    const handleDelete = async (assetId) => {
+        const token = localStorage.getItem('token'); // get your token
+        try {
+            await axios.delete(`http://localhost:5001/api/assets/${assetId}`, {
+                headers: { Authorization: `Bearer ${token}` }
+            });
+            fetchAssets(); // refresh asset list after deletion
+        } catch (err) {
+            console.error('Error deleting asset:', err);
+        }
+    };
+
+
+    const token = localStorage.getItem("token");
+    const handleOpenForm = () => {
+        setSelectedAsset(null); 
+        setOpenFormModal(true);
+    };
+    const handleCloseForm = () => setOpenFormModal(false);
+
+    const assetRequestsPerMonth = () => {
+        const months = [
+            'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'
+        ];
+
+        const monthlyData = months.map((month, index) => {
+            const monthNumber = index; // 0 = Jan
+            const total = assets.filter(asset => new Date(asset.purchaseDate).getMonth() === monthNumber).length;
+            const approved = assets.filter(
+                asset => new Date(asset.purchaseDate).getMonth() === monthNumber && asset.status === 'Approved'
+            ).length;
+            const pending = assets.filter(
+                asset => new Date(asset.purchaseDate).getMonth() === monthNumber && asset.status === 'Pending'
+            ).length;
+
+            return { name: month, total, approved, pending };
+        });
+
+        return monthlyData;
+    };
+
+
+    const totalAssets = assets.length;
+    const currentYear = new Date().getFullYear();
+    const assetsAddedThisYear = assets.filter(asset => new Date(asset.purchaseDate).getFullYear() === currentYear).length;
+    const availableAssets = assets.filter(asset => asset.status === 'Available').length;
+    const pendingAssets = assets.filter(asset => asset.status === 'Pending').length;
+    const approvedAssets = assetRequests.filter(asset => asset.status === 'Approved').length;
+    const rejectedAssets = assetRequests.filter(asset => asset.status === 'Rejected').length;
+    const fetchAssetRequests = async () => {
+        try {
+            const token = localStorage.getItem('token');
+            const response = await axios.get('http://localhost:5001/api/assetrequests/all', {
+                headers: { Authorization: `Bearer ${token}` }
+            });
+            setAssetRequests(response.data);
+        } catch (err) {
+            console.error('Error fetching asset requests:', err);
+        }
+    };
 
     useEffect(() => {
+        fetchAssetRequests();
+    }, []);
+    console.log(assets);
         const fetchAssets = async () => {
             try {
                 const token = localStorage.getItem('token')
-                console.log(localStorage.getItem('token'))
+console.log(localStorage.getItem('token'))
                 const response = await axios.get('http://localhost:5001/api/assets',{
                     headers: { Authorization: `Bearer ${token}` }
                 });
@@ -74,9 +144,11 @@ export default function DashboardDefault() {
             } catch (err) {
                 console.error('Error fetching assets:',err)
             }
-        }
+    }
+    useEffect(() => {
         fetchAssets();
-    },[])
+    }, [])
+        
   const handleOrderMenuClick = (event) => {
     setOrderMenuAnchor(event.currentTarget);
   };
@@ -91,81 +163,223 @@ export default function DashboardDefault() {
     setAnalyticsMenuAnchor(null);
   };
 
-  return (
+    return (
+      <>
     <Grid container rowSpacing={4.5} columnSpacing={2.75}>
       {/* row 1 */}
       <Grid sx={{ mb: -2.25 }} size={12}>
-        <Typography variant="h5">Dashboard</Typography>
+        <Typography variant="h5">Well come Admin </Typography>
       </Grid>
       <Grid size={{ xs: 12, sm: 6, lg: 3 }}>
-        <AnalyticEcommerce title="Total Page Views" count="4,42,236" percentage={59.3} extra="35,000" />
+                    <Box
+                        sx={{
+                            transition: 'all 0.3s ease',
+                            '&:hover': {
+                                transform: 'translateY(-8px)',
+                                boxShadow: '0px 8px 20px rgba(0,0,0,0.15)',
+                                cursor: 'pointer'
+                            }
+                        }}
+                    >
+              <AnalyticEcommerce
+                  title="Total Assets"
+                  count={totalAssets}
+                        />
+                   </Box>
       </Grid>
-      <Grid size={{ xs: 12, sm: 6, lg: 3 }}>
-        <AnalyticEcommerce title="Total Users" count="78,250" percentage={70.5} extra="8,900" />
+                <Grid size={{ xs: 12, sm: 6, lg: 3 }}>
+                    <Box
+                        sx={{
+                            transition: 'all 0.3s ease',
+                            '&:hover': {
+                                transform: 'translateY(-8px)',
+                                boxShadow: '0px 8px 20px rgba(0,0,0,0.15)',
+                                cursor: 'pointer'
+                            }
+                        }}
+                    >
+              <AnalyticEcommerce
+                  title="AvailableAssets"
+                            count={availableAssets}
+                            percentage={totalAssets
+                                ? ((availableAssets / totalAssets) * 100).toFixed(1)
+                                : 0}
+                  
+                        />
+              </Box>
       </Grid>
-      <Grid size={{ xs: 12, sm: 6, lg: 3 }}>
-        <AnalyticEcommerce title="Total Order" count="18,800" percentage={27.4} isLoss color="warning" extra="1,943" />
+                <Grid size={{ xs: 12, sm: 6, lg: 3 }}>
+                    <Box
+                        sx={{
+                            transition: 'all 0.3s ease',
+                            '&:hover': {
+                                transform: 'translateY(-8px)',
+                                boxShadow: '0px 8px 20px rgba(0,0,0,0.15)',
+                                cursor: 'pointer'
+                            }
+                        }}
+                    >
+              <AnalyticEcommerce
+                  title="Approved Assets"
+                  count={approvedAssets}
+                            percentage={totalAssets
+                                ? ((approvedAssets / totalAssets) * 100).toFixed(1)
+                                : 0}
+                  extra={`${pendingAssets} pending`}
+                        />
+                    </Box>
       </Grid>
-      <Grid size={{ xs: 12, sm: 6, lg: 3 }}>
-        <AnalyticEcommerce title="Total Sales" count="35,078" percentage={27.4} isLoss color="warning" extra="20,395" />
-      </Grid>
+                <Grid size={{ xs: 12, sm: 6, lg: 3 }}>
+                    <Box
+                        sx={{
+                            transition: 'all 0.3s ease',
+                            '&:hover': {
+                                transform: 'translateY(-8px)',
+                                boxShadow: '0px 8px 20px rgba(0,0,0,0.15)',
+                                cursor: 'pointer'
+                            }
+                        }}
+                    >
+                        <AnalyticEcommerce title="Rejected Assets"
+                            count={rejectedAssets}
+                            percentage={totalAssets
+                                ? ((rejectedAssets / totalAssets) * 100).toFixed(1)
+                                : 0}
+                           />
+        </Box>
+                </Grid>
       <Grid sx={{ display: { sm: 'none', md: 'block', lg: 'none' } }} size={{ md: 8 }} />
-      {/* row 2 */}
-      <Grid size={{ xs: 12, md: 7, lg: 8 }}>
-        <UniqueVisitorCard />
-      </Grid>
-      <Grid size={{ xs: 12, md: 5, lg: 4 }}>
-        <Grid container sx={{ alignItems: 'center', justifyContent: 'space-between' }}>
-          <Grid>
-            <Typography variant="h5">Income Overview</Typography>
+          {/* row 2 */}
+          <Grid size={{ xs: 12, md: 7, lg: 8 }}>
+              <Grid container sx={{ alignItems: 'center', justifyContent: 'space-between' }}>
+                  <Grid>
+                      <Typography variant="h5">Assets Requests</Typography>
+                  </Grid>
+                  <Grid>
+                      <IconButton onClick={handleOrderMenuClick}>
+                          <EllipsisOutlined style={{ fontSize: '1.25rem' }} />
+                      </IconButton>
+                      <Menu
+                          id="fade-menu"
+                          slotProps={{ list: { 'aria-labelledby': 'fade-button' } }}
+                          anchorEl={orderMenuAnchor}
+                          onClose={handleOrderMenuClose}
+                          open={Boolean(orderMenuAnchor)}
+                          anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}
+                          transformOrigin={{ vertical: 'top', horizontal: 'right' }}
+                      >
+                          <MenuItem onClick={handleOrderMenuClose}>Export as CSV</MenuItem>
+                          <MenuItem onClick={handleOrderMenuClose}>Export as Excel</MenuItem>
+                          <MenuItem onClick={handleOrderMenuClose}>Print Table</MenuItem>
+                      </Menu>
+                  </Grid>
+              </Grid>
+              <MainCard sx={{ mt: 1 }} content={false}>
+                  <OrdersTable />
+              </MainCard>
           </Grid>
-          <Grid />
-        </Grid>
-        <MainCard sx={{ mt: 2 }} content={false}>
-          <Box sx={{ p: 3, pb: 0 }}>
-            <Stack sx={{ gap: 2 }}>
-              <Typography variant="h6" color="text.secondary">
-                This Week Statistics
-              </Typography>
-              <Typography variant="h3">$7,650</Typography>
-            </Stack>
-          </Box>
-          <MonthlyBarChart />
-        </MainCard>
-      </Grid>
+      
+      <Grid size={{ xs: 12, md: 5, lg: 4 }}>
+                    <Grid container sx={{ alignItems: 'center', justifyContent: 'space-between' }}>
+                        <Grid>
+                            <Typography variant="h5">
+                                {openFormModal ? (selectedAsset ? "Edit Asset" : "Add Asset") : "Assets Overview"}
+                            </Typography>
+                        </Grid>
+                        <Grid>
+                            {!openFormModal && (
+                                <Button variant="contained" onClick={handleOpenForm}>
+                                    Add Asset
+                                </Button>
+                            )}
+                        </Grid>
+                    </Grid>
+
+                    {/* IF form is open, show form ONLY here */}
+                    {openFormModal ? (
+                        <Box sx={{ mt: 2 }}>
+                            <AssetForm
+                                token={localStorage.getItem("token")}
+                                asset={selectedAsset}
+                                onSuccess={() => {
+                                    fetchAssets();
+                                    setOpenFormModal(false);
+                                }}
+                                onClose={() => setOpenFormModal(false)}
+                            />
+                        </Box>
+                    ) : (
+                        /* Otherwise show Assets Overview */
+                        <MainCard sx={{ mt: 2, p: 2 }}>
+                            <Typography variant="h6" sx={{ mb: 2 }}>
+                                All Assets
+                            </Typography>
+                                {assets.map((a) => (
+                                    <Box
+                                        key={a.id}
+                                        sx={{
+                                            p: 1,
+                                            borderBottom: '1px solid #eee',
+                                            display: "flex",
+                                            gap: 2
+                                        }}
+                                    >
+                                        {/* Asset Image */}
+                                        console.log(a.imageUrl)
+                                        <img
+                                            src={a.imageUrl}
+                                            alt={a.name}
+                                            style={{
+                                                width: "70px",
+                                                height: "70px",
+                                                borderRadius: "6px",
+                                                objectFit: "cover",
+                                                border: "1px solid #ddd"
+                                            }}
+                                        />
+
+                                        {/* Asset Details (WRAPPED CORRECTLY) */}
+                                        <Box sx={{ flex: 1 }}>
+                                            <Typography><b>{a.name}</b></Typography>
+                                            <Typography variant="body2">Category: {a.category}</Typography>
+                                            <Typography variant="body2">Serial: {a.serialNumber}</Typography>
+                                            <Typography variant="body2">Status: {a.status}</Typography>
+
+                                            <Box sx={{ mt: 1, display: 'flex', gap: 1 }}>
+                                                <Button
+                                                    size="small"
+                                                    variant="outlined"
+                                                    onClick={() => {
+                                                        setSelectedAsset(a);
+                                                        setOpenFormModal(true);
+                                                    }}
+                                                >
+                                                    Edit
+                                                </Button>
+
+                                                <Button
+                                                    size="small"
+                                                    variant="contained"
+                                                    color="error"
+                                                    onClick={() => handleDelete(a.id)}
+                                                >
+                                                    Delete
+                                                </Button>
+                                            </Box>
+                                        </Box>
+                                    </Box>
+                                ))}
+
+                        </MainCard>
+                    )}
+</Grid>
+
       {/* row 3 */}
-      <Grid size={{ xs: 12, md: 7, lg: 8 }}>
-        <Grid container sx={{ alignItems: 'center', justifyContent: 'space-between' }}>
-          <Grid>
-            <Typography variant="h5">Recent Orders</Typography>
-          </Grid>
-          <Grid>
-            <IconButton onClick={handleOrderMenuClick}>
-              <EllipsisOutlined style={{ fontSize: '1.25rem' }} />
-            </IconButton>
-            <Menu
-              id="fade-menu"
-              slotProps={{ list: { 'aria-labelledby': 'fade-button' } }}
-              anchorEl={orderMenuAnchor}
-              onClose={handleOrderMenuClose}
-              open={Boolean(orderMenuAnchor)}
-              anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}
-              transformOrigin={{ vertical: 'top', horizontal: 'right' }}
-            >
-              <MenuItem onClick={handleOrderMenuClose}>Export as CSV</MenuItem>
-              <MenuItem onClick={handleOrderMenuClose}>Export as Excel</MenuItem>
-              <MenuItem onClick={handleOrderMenuClose}>Print Table</MenuItem>
-            </Menu>
-          </Grid>
-        </Grid>
-        <MainCard sx={{ mt: 2 }} content={false}>
-                  <OrdersTable rows={assets} />
-        </MainCard>
-      </Grid>
+        
       <Grid size={{ xs: 12, md: 5, lg: 4 }}>
         <Grid container sx={{ alignItems: 'center', justifyContent: 'space-between' }}>
           <Grid>
-            <Typography variant="h5">Analytics Report</Typography>
+            <Typography variant="h5">Asset Report</Typography>
           </Grid>
           <Grid>
             <IconButton onClick={handleAnalyticsMenuClick}>
@@ -188,20 +402,25 @@ export default function DashboardDefault() {
         </Grid>
         <MainCard sx={{ mt: 2 }} content={false}>
           <List sx={{ p: 0, '& .MuiListItemButton-root': { py: 2 } }}>
-            <ListItemButton divider>
-              <ListItemText primary="Company Finance Growth" />
-              <Typography variant="h5">+45.14%</Typography>
-            </ListItemButton>
-            <ListItemButton divider>
-              <ListItemText primary="Company Expenses Ratio" />
-              <Typography variant="h5">0.58%</Typography>
-            </ListItemButton>
-            <ListItemButton>
-              <ListItemText primary="Business Risk Cases" />
-              <Typography variant="h5">Low</Typography>
-            </ListItemButton>
+                      <ListItemButton divider>
+                          <ListItemText primary="Total Assets" />
+                          <Typography variant="h5">{totalAssets}</Typography>
+                      </ListItemButton>
+                      <ListItemButton divider>
+                          <ListItemText primary="Available Assets" />
+                          <Typography variant="h5">{availableAssets}</Typography>
+                      </ListItemButton>
+                      <ListItemButton divider>
+                          <ListItemText primary="Approved Assets" />
+                          <Typography variant="h5">{approvedAssets}</Typography>
+                      </ListItemButton>
+                      <ListItemButton>
+                          <ListItemText primary="Assets Added This Year" />
+                          <Typography variant="h5">{assetsAddedThisYear}</Typography>
+                      </ListItemButton>
+
           </List>
-          <ReportAreaChart />
+                  <ReportAreaChart chartData={assetRequestsPerMonth()} />
         </MainCard>
       </Grid>
       {/* row 4 */}
@@ -216,7 +435,8 @@ export default function DashboardDefault() {
           <Grid />
         </Grid>
         <MainCard sx={{ mt: 2 }} content={false}>
-          <List
+                  <List
+
             component="nav"
             sx={{
               px: 0,
@@ -297,6 +517,9 @@ export default function DashboardDefault() {
           <Stack sx={{ gap: 3 }}>
             <Grid container sx={{ alignItems: 'center', justifyContent: 'space-between' }}>
               <Grid>
+
+
+
                 <Stack>
                   <Typography variant="h5" noWrap>
                     Help & Support Chat
@@ -321,6 +544,10 @@ export default function DashboardDefault() {
           </Stack>
         </MainCard>
       </Grid>
-    </Grid>
+      </Grid>
+            
+
+
+    </>
   );
 }

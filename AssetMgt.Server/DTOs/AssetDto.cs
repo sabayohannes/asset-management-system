@@ -5,7 +5,9 @@
         public string Name { get; set; }
         public string Category  { get; set; }
         public string SerialNumber { get; set; }
-        public DateTime PurchaseDate { get; set; }
+        public string PurchaseDate { get; set; }
+        public IFormFile? Image { get; set; } 
+
 
     }
 }

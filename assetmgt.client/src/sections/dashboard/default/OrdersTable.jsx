@@ -10,6 +10,15 @@ import TableHead from '@mui/material/TableHead';
 import TableRow from '@mui/material/TableRow';
 import Typography from '@mui/material/Typography';
 import Box from '@mui/material/Box';
+import React from 'react'
+import IconButton from '@mui/material/IconButton';
+import MoreVertIcon from '@mui/icons-material/MoreVert';
+
+import Menu from '@mui/material/Menu';
+import MenuItem from '@mui/material/MenuItem';
+import axios from 'axios';
+import {useState,useEffect } from 'react'
+
 
 // third-party
 import { NumericFormat } from 'react-number-format';
@@ -17,22 +26,12 @@ import { NumericFormat } from 'react-number-format';
 // project imports
 import Dot from 'components/@extended/Dot';
 
+
 function createData(tracking_no, name, fat, carbs, protein) {
   return { tracking_no, name, fat, carbs, protein };
 }
 
-const rows = [
-  createData(84564564, 'Camera Lens', 40, 2, 40570),
-  createData(98764564, 'Laptop', 300, 0, 180139),
-  createData(98756325, 'Mobile', 355, 1, 90989),
-  createData(98652366, 'Handset', 50, 1, 10239),
-  createData(13286564, 'Computer Accessories', 100, 1, 83348),
-  createData(86739658, 'TV', 99, 0, 410780),
-  createData(13256498, 'Keyboard', 125, 2, 70999),
-  createData(98753263, 'Mouse', 89, 2, 10570),
-  createData(98753275, 'Desktop', 185, 1, 98063),
-  createData(98753291, 'Chair', 100, 0, 14001)
-];
+
 
 function descendingComparator(a, b, orderBy) {
   if (b[orderBy] < a[orderBy]) {
@@ -65,12 +64,14 @@ const headCells = [
     { id: 'name', align: 'left', disablePadding: false, label: 'Asset Name' },
     { id: 'category', align: 'left', disablePadding: false, label: 'Category' },
     { id: 'status', align: 'left', disablePadding: false, label: 'Status' },
-    { id: 'purchaseDate', align: 'left', disablePadding: false, label: 'Purchase Date' }
+    { id: 'purchaseDate', align: 'left', disablePadding: false, label: 'Purchase Date' },
+    { id: 'actions', align: 'left', disablePadding: false, label: 'Actions' }
 ];
 
 // ==============================|| ORDER TABLE - HEADER ||============================== //
 
 function OrderTableHead({ order, orderBy }) {
+    
   return (
     <TableHead>
       <TableRow>
@@ -111,12 +112,90 @@ function OrderStatus({ status }) {
     </Stack>
   );
 }
+function RowActions({ onApprove, onReject, onAssign }) {
+    const [anchorEl, setAnchorEl] = React.useState(null);
+
+    const handleOpen = (event) => {
+        setAnchorEl(event.currentTarget);
+    };
+
+    const handleClose = () => {
+        setAnchorEl(null);
+
+    };
+    return (
+        <>
+            <IconButton onClick={handleOpen}>
+                <MoreVertIcon />
+            </IconButton>
+
+            <Menu anchorEl={anchorEl} open={Boolean(anchorEl)} onClose={handleClose}>
+                <MenuItem onClick={() => { handleClose(); onApprove(); }}>
+                    Approve
+                </MenuItem>
+
+                <MenuItem onClick={() => { handleClose(); onReject(); }}>
+                    Reject
+                </MenuItem>
+
+                <MenuItem onClick={() => { handleClose(); onAssign(); }}>
+                    Assign
+                </MenuItem>
+            </Menu>
+        </>
+    );
+}
 
 // ==============================|| ORDER TABLE ||============================== //
 
-export default function OrderTable({ rows }) {
+export default function OrderTable( ) {
+    const [rows, setRows] = useState([]);
+
+    const fetchRows = async () => {
+        const token = localStorage.getItem('token')
+        try {
+            const response = await axios.get('http://localhost:5001/api/assetrequests/all', {
+                headers: {
+                    Authorization: `Bearer ${token}`
+                }
+
+            })
+            setRows(response.data)
+            
+        } catch (error) {
+            console.error("Error fetching rows:", error);
+        }
+    }
+    useEffect(() => {
+        fetchRows()
+    }, [])
   const order = 'asc';
-  const orderBy = 'tracking_no';
+    const orderBy = 'id';
+    const approve = async (id) => {
+        const token = localStorage.getItem('token');
+        await axios.post(`http://localhost:5001/api/assetrequests/requests/${id}/approve`,
+            {},
+            {
+                headers: {
+                Authorization: `Bearer ${token}`
+                }
+            })
+        onActionComplete();
+    };
+
+    const reject = async(id) => {
+        const token = localStorage.getItem('token');
+        await axios.post(`http://localhost:5001/api/assetrequests/requests/${id}/reject`, {},
+            {
+                headers: {Authorization:`Bearer ${token}`}
+            })
+        onActionComplete();
+
+    };
+
+    const assign = (id) => {
+        console.log("Assign:", id);
+    };
 
   return (
     <Box>
@@ -136,12 +215,20 @@ export default function OrderTable({ rows }) {
                       (rows.map((row, index) =>
                       (<TableRow hover key={row.id || index}>
                           <TableCell>{row.id}</TableCell>
-                          <TableCell>{row.name}</TableCell>
-                          <TableCell >{row.category}</TableCell>                         
+                          <TableCell>{row.asset?.name}</TableCell>
+                          <TableCell>{row.asset?.category}</TableCell>
                           <TableCell><OrderStatus status={row.status} /></TableCell>
-                          <TableCell >{new Date(row.purchaseDate).toLocaleDateString()}</TableCell>
-                          <TableCell align="right"> <NumericFormat value={row.amount} displayType="text" thousandSeparator prefix="$" /> </TableCell>
-                      </TableRow>))) : (<TableRow> <TableCell colSpan={5} align="center">No data available</TableCell> </TableRow>)} </TableBody>
+                          <TableCell>
+                              {row.asset?.purchaseDate ? new Date(row.asset.purchaseDate).toLocaleDateString() : '-'}
+                          </TableCell>
+                          <TableCell>
+                              <RowActions
+                                  onApprove={() => approve(row.id)}
+                                  onReject={() => reject(row.id)}
+                                  onAssign={() => assign(row.id)}
+                              />
+                          </TableCell>
+                      </TableRow>))) : (<TableRow> <TableCell colSpan={6} align="center">No data available</TableCell> </TableRow>)} </TableBody>
         </Table>
       </TableContainer>
     </Box>
@@ -150,4 +237,9 @@ export default function OrderTable({ rows }) {
 
 OrderTableHead.propTypes = { order: PropTypes.any, orderBy: PropTypes.string };
 
-OrderStatus.propTypes = { status: PropTypes.String };
+OrderStatus.propTypes = { status: PropTypes.string };
+RowActions.propTypes = {
+    onApprove: PropTypes.func.isRequired,
+    onReject: PropTypes.func.isRequired,
+    onAssign: PropTypes.func.isRequired
+};

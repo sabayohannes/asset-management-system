@@ -71,14 +71,16 @@ builder.Services.AddAuthentication(options =>
 var app = builder.Build();
 app.UseDefaultFiles();
 app.UseStaticFiles();
-app.UseAuthentication();
+
 
 // Configure the HTTP request pipeline.
 app.UseCors("AllowViteFrontend");
 
 app.UseHttpsRedirection();
-
+app.UseAuthentication();
 app.UseAuthorization();
+
+
 
 app.MapControllers();
 

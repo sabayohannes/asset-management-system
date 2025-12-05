@@ -28,7 +28,22 @@ namespace AssetMgt.Server.Controllers
                 return Unauthorized(new { messagae = "invalid or missing userId" });
                 if(request.AssetId == 0)
                 return BadRequest(new {message="assetId is required"});
-                    var assetRequest = new AssetRequest
+
+            var existingRequest = await _context.AssetRequests
+     .FirstOrDefaultAsync(r => r.AssetId == request.AssetId && r.Status == "Approved");
+
+            if (existingRequest != null)
+            {
+                return BadRequest(new { message = "This asset has already been approved and cannot be requested." });
+            }
+            var asset = await _context.Assets.FindAsync(request.AssetId);
+            if (asset == null) return NotFound("Asset not found");
+            if (asset.Status == "Assigned")
+            {
+                return BadRequest(new { message = "This asset is already assigned and cannot be requested." });
+            }
+
+            var assetRequest = new AssetRequest
                     {
                         UserId = Guid.Parse(userId),
                         AssetId = request.AssetId,
@@ -77,7 +92,7 @@ namespace AssetMgt.Server.Controllers
             var request=await _context.AssetRequests.Include(r =>r.Asset).FirstOrDefaultAsync(r => r.Id == requestId);
             if (request == null) return NotFound("Request not found");
                     request.Status = "Approved";
-            request.Asset.Status = "Assigned";
+                    request.Asset.Status = "Assigned";
             await _context.SaveChangesAsync();
             return Ok(new { message = "Request approved" });
         }

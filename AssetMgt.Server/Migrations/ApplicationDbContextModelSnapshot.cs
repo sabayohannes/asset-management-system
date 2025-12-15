@@ -133,6 +133,9 @@ namespace AssetMgt.Server.Migrations
                     b.Property<int>("AssetId")
                         .HasColumnType("integer");
 
+                    b.Property<bool>("IsRead")
+                        .HasColumnType("boolean");
+
                     b.Property<DateTime>("RequestDate")
                         .HasColumnType("timestamp with time zone");
 

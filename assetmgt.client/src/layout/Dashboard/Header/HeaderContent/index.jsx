@@ -3,6 +3,7 @@ import useMediaQuery from '@mui/material/useMediaQuery';
 import IconButton from '@mui/material/IconButton';
 import Link from '@mui/material/Link';
 import Box from '@mui/material/Box';
+import Typography from '@mui/material/Typography'
 
 // project imports
 import Search from './Search';
@@ -17,22 +18,17 @@ import { GithubOutlined } from '@ant-design/icons';
 
 export default function HeaderContent() {
   const downLG = useMediaQuery((theme) => theme.breakpoints.down('lg'));
-
+    const role = localStorage.getItem("role");
+  
   return (
     <>
+
       {!downLG && <Search />}
       {downLG && <Box sx={{ width: '100%', ml: 1 }} />}
-      <IconButton
-        component={Link}
-        href="https://github.com/codedthemes/mantis-free-react-admin-template"
-        target="_blank"
-        disableRipple
-        color="secondary"
-        title="Download Free Version"
-        sx={{ color: 'text.primary', bgcolor: 'grey.100' }}
-      >
-        <GithubOutlined />
-      </IconButton>
+          <Box sx={{ color: '#1890FF', whiteSpace: 'nowrap' }}>
+              Logged as {role === "Admin" ? "Admin" : localStorage.getItem("email")}
+
+          </Box>
 
       <Notification />
       {!downLG && <Profile />}

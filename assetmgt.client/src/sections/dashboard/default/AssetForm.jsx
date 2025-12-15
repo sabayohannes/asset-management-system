@@ -10,16 +10,34 @@ export default function AssetForm({ token, asset, onSuccess, onClose }) {
         asset ? asset.purchaseDate.split('T')[0] : ''
     );
     const [image, setImage] = useState(null);
-    const [preview, setPreview] = useState(asset?.imageUrl || '');
+    const [preview, setPreview] = useState('');
 
-    // Show preview of selected file
     useEffect(() => {
         if (image) {
+            // When selecting a new file
             const objectUrl = URL.createObjectURL(image);
             setPreview(objectUrl);
             return () => URL.revokeObjectURL(objectUrl);
         }
-    }, [image]);
+
+        if (asset && asset.imageUrl) {
+            console.log("Incoming asset image:", asset.imageUrl);
+
+            // Always use full URL (because backend now returns absolute)
+            setPreview(asset.imageUrl);
+            return;
+        }
+
+        setPreview("");
+    }, [image, asset]);
+
+
+
+
+    useEffect(() => {
+        console.log("Image URL:", asset?.imageUrl);
+        console.log("Preview URL:", preview);
+    }, [preview]);
 
     const handleSubmit = async (e) => {
         e.preventDefault();
@@ -29,11 +47,12 @@ export default function AssetForm({ token, asset, onSuccess, onClose }) {
         formData.append('Category', category);
         formData.append('SerialNumber', serialNumber);
         formData.append('PurchaseDate', purchaseDate);
-        if (image) formData.append('Image', image);
-
+       
+        if (image instanceof File)
+            formData.append("Image", image);
         try {
             if (asset) {
-                // UPDATE
+               
                 await axios.put(
                     `http://localhost:5001/api/assets/${asset.id}`,
                     
@@ -47,7 +66,7 @@ export default function AssetForm({ token, asset, onSuccess, onClose }) {
                     }
                 );
             } else {
-                // ADD NEW
+               
                 await axios.post(
                     'http://localhost:5001/api/assets/assetregister',
                    

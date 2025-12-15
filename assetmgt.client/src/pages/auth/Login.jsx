@@ -24,7 +24,7 @@ export default function Login() {
           </Stack>
         </Grid>
         <Grid size={12}>
-          <AuthLogin />
+          <AuthLogin/>
         </Grid>
       </Grid>
     </AuthWrapper>

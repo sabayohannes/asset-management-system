@@ -68,6 +68,8 @@ export default function DashboardDefault() {
     const [openFormModal, setOpenFormModal] = useState(false);
     const [assetRequests, setAssetRequests] = useState([]);
     const [selectedAsset, setSelectedAsset] = useState(null);
+    const [assetMenuAnchor, setAssetMenuAnchor] = useState(null);
+    const [menuAssetId, setMenuAssetId] = useState(null);
     const handleDelete = async (assetId) => {
         const token = localStorage.getItem('token'); // get your token
         try {
@@ -86,7 +88,12 @@ export default function DashboardDefault() {
         setSelectedAsset(null); 
         setOpenFormModal(true);
     };
-    const handleCloseForm = () => setOpenFormModal(false);
+    const handleCloseForm = () => {
+        setOpenFormModal(false)
+        setAssetMenuAnchor(null);
+        setMenuAssetId(null);
+        setSelectedAsset(null);
+    };
 
     const assetRequestsPerMonth = () => {
         const months = [
@@ -162,7 +169,7 @@ console.log(localStorage.getItem('token'))
   const handleAnalyticsMenuClose = () => {
     setAnalyticsMenuAnchor(null);
   };
-
+  
     return (
       <>
     <Grid container rowSpacing={4.5} columnSpacing={2.75}>
@@ -304,8 +311,12 @@ console.log(localStorage.getItem('token'))
                                 onSuccess={() => {
                                     fetchAssets();
                                     setOpenFormModal(false);
+                                    handleCloseForm();
                                 }}
-                                onClose={() => setOpenFormModal(false)}
+                                onClose={() => {
+                                  
+                                     handleCloseForm ()
+                                }}
                             />
                         </Box>
                     ) : (
@@ -313,62 +324,67 @@ console.log(localStorage.getItem('token'))
                         <MainCard sx={{ mt: 2, p: 2 }}>
                             <Typography variant="h6" sx={{ mb: 2 }}>
                                 All Assets
-                            </Typography>
+                                </Typography>
+                                <Box
+                                    sx={{
+                                        maxHeight: 'calc(70px * 4 + 16px * 4)',
+                                        overflowY: 'auto',
+                                        '&::-webkit-scrollbar': {
+                                            width: '6px',
+                                        },
+                                        '&::-webkit-scrollbar-thumb': {
+                                            backgroundColor: 'rgba(0,0,0,0.2)',
+                                            borderRadius: '3px',
+                                        },
+                                    }}
+                                >
+                                
                                 {assets.map((a) => (
-                                    <Box
-                                        key={a.id}
-                                        sx={{
-                                            p: 1,
-                                            borderBottom: '1px solid #eee',
-                                            display: "flex",
-                                            gap: 2
-                                        }}
-                                    >
-                                        {/* Asset Image */}
-                                        console.log(a.imageUrl)
+                                    <Box key={a.id} sx={{
+                                        p: 1, borderBottom: '1px solid #eee', display: "flex", gap: 2, alignItems: 'center',
+
+                                    }}>
+
                                         <img
                                             src={a.imageUrl}
                                             alt={a.name}
-                                            style={{
-                                                width: "70px",
-                                                height: "70px",
-                                                borderRadius: "6px",
-                                                objectFit: "cover",
-                                                border: "1px solid #ddd"
-                                            }}
+                                            style={{ width: "70px", height: "70px", borderRadius: "6px", objectFit: "cover", border: "1px solid #ddd" }}
                                         />
 
-                                        {/* Asset Details (WRAPPED CORRECTLY) */}
                                         <Box sx={{ flex: 1 }}>
                                             <Typography><b>{a.name}</b></Typography>
                                             <Typography variant="body2">Category: {a.category}</Typography>
                                             <Typography variant="body2">Serial: {a.serialNumber}</Typography>
                                             <Typography variant="body2">Status: {a.status}</Typography>
-
-                                            <Box sx={{ mt: 1, display: 'flex', gap: 1 }}>
-                                                <Button
-                                                    size="small"
-                                                    variant="outlined"
-                                                    onClick={() => {
-                                                        setSelectedAsset(a);
-                                                        setOpenFormModal(true);
-                                                    }}
-                                                >
-                                                    Edit
-                                                </Button>
-
-                                                <Button
-                                                    size="small"
-                                                    variant="contained"
-                                                    color="error"
-                                                    onClick={() => handleDelete(a.id)}
-                                                >
-                                                    Delete
-                                                </Button>
-                                            </Box>
                                         </Box>
+
+                                        <IconButton
+                                            onClick={(e) => {
+                                                setAssetMenuAnchor(e.currentTarget);
+                                                setMenuAssetId(a.id);
+                                            }}
+                                        >
+                                            <EllipsisOutlined style={{ fontSize: '1.25rem' ,color: 'blue' }} />
+                                        </IconButton>
+
+                                        <Menu
+                                            anchorEl={assetMenuAnchor}
+                                            open={menuAssetId === a.id}
+                                            onClose={() => setAssetMenuAnchor(null)}
+                                            anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}
+                                            transformOrigin={{ vertical: 'top', horizontal: 'right' }}
+                                        >
+                                            <MenuItem onClick={() => { setSelectedAsset(a); setOpenFormModal(true); setAssetMenuAnchor(null); }}>
+                                                Edit
+                                            </MenuItem>
+                                            <MenuItem onClick={() => { handleDelete(a.id); setAssetMenuAnchor(null); }}>
+                                                Delete
+                                            </MenuItem>
+                                        </Menu>
+
                                     </Box>
-                                ))}
+                                ))}</Box>
+
 
                         </MainCard>
                     )}

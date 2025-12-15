@@ -30,8 +30,34 @@ namespace AssetMgt.Server.Controllers
         [Authorize(Roles = "Admin")]
         public async Task<IActionResult> GetAllAssets() {
             var assets = await _context.Assets.ToListAsync();
+            var baseUrl = $"{Request.Scheme}://{Request.Host}";
+
+            foreach (var asset in assets)
+            {
+                if (!string.IsNullOrEmpty(asset.ImageUrl) && !asset.ImageUrl.StartsWith("http"))
+                {
+                    asset.ImageUrl = $"{baseUrl}{asset.ImageUrl}";
+                }
+            }
             return Ok(assets);
         }
+        [HttpGet("{id}")]
+        [Authorize(Roles = "Admin")]
+        public async Task<IActionResult> GetAssetById(int id)
+        {
+            var asset = await _context.Assets.FindAsync(id);
+            if (asset == null)
+                return NotFound("Asset not found");
+
+            var baseUrl = $"{Request.Scheme}://{Request.Host}";
+            if (!string.IsNullOrEmpty(asset.ImageUrl) && !asset.ImageUrl.StartsWith("http"))
+            {
+                asset.ImageUrl = $"{baseUrl}{asset.ImageUrl}";
+            }
+
+            return Ok(asset);
+        }
+
         [HttpPost("assetregister")]
         [Authorize(Roles = "Admin")]
         public async Task<IActionResult> CreateAsset([FromForm] AssetDto assetDto)
@@ -41,26 +67,24 @@ namespace AssetMgt.Server.Controllers
                 return Conflict("Asset with the same serial number already exists");
 
             var purchaseDate = DateTime.Parse(assetDto.PurchaseDate).ToUniversalTime();
-
-
             string imageUrl = "";
 
-            if (assetDto.Image != null)
+            if (assetDto.Image != null && assetDto.Image.Length > 0)
             {
                 var uploadsFolder = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot/uploads");
-                if (!Directory.Exists(uploadsFolder))
-                    Directory.CreateDirectory(uploadsFolder);
+        if (!Directory.Exists(uploadsFolder))
+            Directory.CreateDirectory(uploadsFolder);
 
-                var fileName = $"{Guid.NewGuid()}{Path.GetExtension(assetDto.Image.FileName)}";
-                var filePath = Path.Combine(uploadsFolder, fileName);
+        var uniqueFileName = Guid.NewGuid().ToString() + Path.GetExtension(assetDto.Image.FileName);
+        var filePath = Path.Combine(uploadsFolder, uniqueFileName);
 
-                using (var stream = new FileStream(filePath, FileMode.Create))
-                {
-                    await assetDto.Image.CopyToAsync(stream);
-                }
+        using (var stream = new FileStream(filePath, FileMode.Create))
+        {
+            await assetDto.Image.CopyToAsync(stream);
+        }
 
-                imageUrl = $"/uploads/{fileName}";
-            }
+        imageUrl = $"http://localhost:5001/uploads/{uniqueFileName}";
+    }
 
             var asset = new Asset
             {
@@ -81,33 +105,49 @@ namespace AssetMgt.Server.Controllers
 
         [HttpPut("{id}")]
         [Authorize(Roles = "Admin")]
-        public async Task<IActionResult> UpdateAsset(int id, [FromBody] AssetDto assetDto)
+        public async Task<IActionResult> UpdateAsset(int id, [FromForm] AssetDto assetDto)
         {
             var asset = await _context.Assets.FindAsync(id);
             if (asset == null)
                 return NotFound("Asset not found");
 
-           
             var exists = await _context.Assets
                 .AnyAsync(a => a.SerialNumber == assetDto.SerialNumber && a.Id != id);
 
             if (exists)
                 return Conflict("Another asset with the same serial number already exists");
 
-
             var purchaseDate = DateTime.Parse(assetDto.PurchaseDate).ToUniversalTime();
-
 
             asset.Name = assetDto.Name;
             asset.Category = assetDto.Category;
             asset.SerialNumber = assetDto.SerialNumber;
             asset.PurchaseDate = purchaseDate;
-          
+
+            // ✔ Update image if new file uploaded
+            if (assetDto.Image != null && assetDto.Image.Length > 0)
+            {
+                var uploadsFolder = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot/uploads");
+                if (!Directory.Exists(uploadsFolder))
+                    Directory.CreateDirectory(uploadsFolder);
+
+                var newFileName = Guid.NewGuid().ToString() + Path.GetExtension(assetDto.Image.FileName);
+                var filePath = Path.Combine(uploadsFolder, newFileName);
+
+                using (var stream = new FileStream(filePath, FileMode.Create))
+                {
+                    await assetDto.Image.CopyToAsync(stream);
+                }
+
+                // Save full URL, consistent with CreateAsset
+                asset.ImageUrl = $"http://localhost:5001/uploads/{newFileName}";
+            }
 
             await _context.SaveChangesAsync();
 
             return Ok(asset);
         }
+
         [HttpDelete("{id}")]
         [Authorize(Roles = "Admin")]
         public async Task<IActionResult> DeleteAsset(int id)
@@ -121,6 +161,7 @@ namespace AssetMgt.Server.Controllers
 
             return Ok(new { message = "Asset deleted successfully" });
         }
+
 
 
         [HttpPost("upload")]

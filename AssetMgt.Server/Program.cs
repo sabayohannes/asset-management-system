@@ -70,7 +70,7 @@ builder.Services.AddAuthentication(options =>
 
 var app = builder.Build();
 app.UseDefaultFiles();
-app.UseStaticFiles();
+
 
 
 // Configure the HTTP request pipeline.
@@ -79,7 +79,7 @@ app.UseCors("AllowViteFrontend");
 app.UseHttpsRedirection();
 app.UseAuthentication();
 app.UseAuthorization();
-
+app.UseStaticFiles(); // allows access to wwwroot folder
 
 
 app.MapControllers();

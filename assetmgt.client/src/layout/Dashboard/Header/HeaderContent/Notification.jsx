@@ -1,4 +1,4 @@
-import { useRef, useState } from 'react';
+import { useRef, useState, useEffect } from 'react';
 
 // material-ui
 import useMediaQuery from '@mui/material/useMediaQuery';
@@ -27,6 +27,7 @@ import CheckCircleOutlined from '@ant-design/icons/CheckCircleOutlined';
 import GiftOutlined from '@ant-design/icons/GiftOutlined';
 import MessageOutlined from '@ant-design/icons/MessageOutlined';
 import SettingOutlined from '@ant-design/icons/SettingOutlined';
+import axios from 'axios';
 
 // sx styles
 const avatarSX = {
@@ -49,20 +50,58 @@ const actionSX = {
 
 export default function Notification() {
   const downMD = useMediaQuery((theme) => theme.breakpoints.down('md'));
+    const anchorRef = useRef(null);
+    const [open, setOpen] = useState(false);
+    const [requests, setRequests] = useState([]);
+    const user = JSON.parse(localStorage.getItem('user'));
+    const isAdmin = user?.role === 'Admin';
+    const [read, setRead] = useState(0);
 
-  const anchorRef = useRef(null);
-  const [read, setRead] = useState(2);
-  const [open, setOpen] = useState(false);
   const handleToggle = () => {
     setOpen((prevOpen) => !prevOpen);
   };
 
   const handleClose = (event) => {
     if (anchorRef.current && anchorRef.current.contains(event.target)) {
-      return;
+
+        return;
     }
     setOpen(false);
   };
+    useEffect(() => {
+        const fetchNotifications = async () => {
+            try {
+                const token = localStorage.getItem('token');
+                const res = await axios.get('http://localhost:5001/api/assetrequests/notifications', {
+                    headers: { Authorization: `Bearer ${token}` },
+                });
+                setRequests(res.data);
+               
+            } catch (err) {
+                console.error("Failed to fetch requests", err);
+                setRequests([]);
+                setRead(0);
+            }
+        };
+        fetchNotifications();
+    }, []);
+
+    const markAllAsRead = async () => {
+        try {
+            const token = localStorage.getItem('token');
+            await axios.put('http://localHost:5001/api/assetrequests/notifications/mark-all-read',{},
+                {
+                    headers: {
+                        Authorization: `Bearer ${token}`
+                    }
+            });
+            setRead(0);
+            setRequests(prev => prev.map(r => ({...r,isRead:true})))
+
+        } catch (err) {
+            console.error("Failed to mark notifications as read", err);
+        }
+    }
 
   return (
     <Box sx={{ flexShrink: 0, ml: 0.75 }}>
@@ -103,147 +142,74 @@ export default function Notification() {
                   content={false}
                   secondary={
                     <>
-                      {read > 0 && (
-                        <Tooltip title="Mark as all read">
-                          <IconButton color="success" size="small" onClick={() => setRead(0)}>
-                            <CheckCircleOutlined style={{ fontSize: '1.15rem' }} />
-                          </IconButton>
-                        </Tooltip>
-                      )}
+                          {read > 0 && (
+                              <Tooltip title="Mark all as read">
+                                  <IconButton color="success" size="small" onClick={markAllAsRead}>
+                                      <CheckCircleOutlined style={{ fontSize: '1.15rem' }} />
+                                  </IconButton>
+                              </Tooltip>
+                          )}
                     </>
                   }
                 >
-                  <List
-                    component="nav"
-                    sx={{
-                      p: 0,
-                      '& .MuiListItemButton-root': {
-                        py: 0.5,
-                        px: 2,
-                        '&.Mui-selected': { bgcolor: 'grey.50', color: 'text.primary' },
-                        '& .MuiAvatar-root': avatarSX,
-                        '& .MuiListItemSecondaryAction-root': { ...actionSX, position: 'relative' }
-                      }
-                    }}
-                  >
-                    <ListItem
-                      component={ListItemButton}
-                      divider
-                      selected={read > 0}
-                      secondaryAction={
-                        <Typography variant="caption" noWrap>
-                          3:00 AM
-                        </Typography>
-                      }
-                    >
-                      <ListItemAvatar>
-                        <Avatar sx={{ color: 'success.main', bgcolor: 'success.lighter' }}>
-                          <GiftOutlined />
-                        </Avatar>
-                      </ListItemAvatar>
-                      <ListItemText
-                        primary={
-                          <Typography variant="h6">
-                            It&apos;s{' '}
-                            <Typography component="span" variant="subtitle1">
-                              Cristina danny&apos;s
-                            </Typography>{' '}
-                            birthday today.
-                          </Typography>
-                        }
-                        secondary="2 min ago"
-                      />
-                    </ListItem>
-                    <ListItem
-                      component={ListItemButton}
-                      divider
-                      secondaryAction={
-                        <Typography variant="caption" noWrap>
-                          6:00 AM
-                        </Typography>
-                      }
-                    >
-                      <ListItemAvatar>
-                        <Avatar sx={{ color: 'primary.main', bgcolor: 'primary.lighter' }}>
-                          <MessageOutlined />
-                        </Avatar>
-                      </ListItemAvatar>
-                      <ListItemText
-                        primary={
-                          <Typography variant="h6">
-                            <Typography component="span" variant="subtitle1">
-                              Aida Burg
-                            </Typography>{' '}
-                            commented your post.
-                          </Typography>
-                        }
-                        secondary="5 August"
-                      />
-                    </ListItem>
-                    <ListItem
-                      component={ListItemButton}
-                      divider
-                      selected={read > 0}
-                      secondaryAction={
-                        <Typography variant="caption" noWrap>
-                          2:45 PM
-                        </Typography>
-                      }
-                    >
-                      <ListItemAvatar>
-                        <Avatar sx={{ color: 'error.main', bgcolor: 'error.lighter' }}>
-                          <SettingOutlined />
-                        </Avatar>
-                      </ListItemAvatar>
-                      <ListItemText
-                        primary={
-                          <Typography variant="h6">
-                            Your Profile is Complete &nbsp;
-                            <Typography component="span" variant="subtitle1">
-                              60%
-                            </Typography>{' '}
-                          </Typography>
-                        }
-                        secondary="7 hours ago"
-                      />
-                    </ListItem>
-                    <ListItem
-                      component={ListItemButton}
-                      divider
-                      secondaryAction={
-                        <Typography variant="caption" noWrap>
-                          9:10 PM
-                        </Typography>
-                      }
-                    >
-                      <ListItemAvatar>
-                        <Avatar sx={{ color: 'primary.main', bgcolor: 'primary.lighter' }}>C</Avatar>
-                      </ListItemAvatar>
-                      <ListItemText
-                        primary={
-                          <Typography variant="h6">
-                            <Typography component="span" variant="subtitle1">
-                              Cristina Danny
-                            </Typography>{' '}
-                            invited to join{' '}
-                            <Typography component="span" variant="subtitle1">
-                              Meeting.
-                            </Typography>
-                          </Typography>
-                        }
-                        secondary="Daily scrum meeting time"
-                      />
-                    </ListItem>
-                    <ListItemButton sx={{ textAlign: 'center', py: `${12}px !important` }}>
-                      <ListItemText
-                        primary={
-                          <Typography variant="h6" color="primary">
-                            View All
-                          </Typography>
-                        }
-                      />
-                    </ListItemButton>
-                  </List>
+                                  <List
+                                      component="nav"
+                                      sx={{
+                                          p: 0,
+                                          '& .MuiListItemButton-root': {
+                                              py: 0.5,
+                                              px: 2,
+                                              '&.Mui-selected': { bgcolor: 'grey.50', color: 'text.primary' },
+                                              '& .MuiAvatar-root': avatarSX,
+                                              '& .MuiListItemSecondaryAction-root': { ...actionSX, position: 'relative' }
+                                          }
+                                      }}
+                                  >
+                                      {requests.length === 0 ? (
+                                          <ListItem>
+                                              <ListItemText primary="No notifications" />
+                                          </ListItem>
+                                      ) : (
+                                          requests.map((req, index) => (
+                                              <ListItem
+                                                  key={req._id || index}
+                                                  component={ListItemButton}
+                                                  divider
+                                              >
+                                                  <ListItemAvatar>
+                                                      <Avatar sx={{ color: 'primary.main', bgcolor: 'primary.lighter' }}>
+                                                          {req.assetName?.[0] || 'A'}
+                                                      </Avatar>
+                                                  </ListItemAvatar>
+                                                  <ListItemText
+                                                      primary={
+                                                          <Typography variant="h6">
+                                                              {isAdmin
+                                                                  ? `Request from ${req.User?.UserName || 'User'}`
+                                                                  : `Asset request: ${req.Asset?.Name || 'Asset'}`}
+                                                          </Typography>
+                                                      }
+                                                      secondary={req.status}
+                                                  />
+                                                  <Typography variant="caption" noWrap>
+                                                      {req.RequestDate
+                                                          ? `${new Date(req.RequestDate).toLocaleDateString()} ${new Date(req.RequestDate).toLocaleTimeString()}`
+                                                          : ''}
+                                                  </Typography>
+                                              </ListItem>
+                                          ))
+                                      )}
+                                      <ListItemButton sx={{ textAlign: 'center', py: '12px !important' }}>
+                                          <ListItemText
+                                              primary={
+                                                  <Typography variant="h6" color="primary">
+                                                      View All
+                                                  </Typography>
+                                              }
+                                          />
+                                      </ListItemButton>
+                                  </List>
+
                 </MainCard>
               </ClickAwayListener>
             </Paper>

@@ -6,6 +6,8 @@ using System.Text;
 using System.IdentityModel.Tokens.Jwt;
 using AssetMgt.Server.Models;
 using Microsoft.IdentityModel.Tokens;
+using Microsoft.AspNetCore.Authorization;
+
 
 
 
@@ -41,6 +43,8 @@ namespace AssetMgt.Server.Controllers;
                 return BadRequest("Password is required.");
             if (string.IsNullOrWhiteSpace(dto.Role))
                 return BadRequest("Role  is required.");
+           if (string.IsNullOrWhiteSpace(dto.Name))
+            return BadRequest("Name is requiered");
             var existigUser = await _userManager.FindByEmailAsync(dto.Email);
             if (existigUser != null)
             {
@@ -50,7 +54,8 @@ namespace AssetMgt.Server.Controllers;
             var user = new ApplicationUser
             {
                 UserName = dto.Email,
-                Email = dto.Email
+                Email = dto.Email,
+                Name=dto.Name,
             };
             var result = await _userManager.CreateAsync(user, dto.Password);
             if (!result.Succeeded)
@@ -68,6 +73,44 @@ namespace AssetMgt.Server.Controllers;
             await _userManager.AddToRoleAsync(user, dto.Role);
             return Ok("user successfully registered");
         }
+    [Authorize]
+    [HttpGet("me")]
+    public async Task<IActionResult> GetProfile()
+    {
+        var userId = User.FindFirstValue("uid");
+        var user = await _userManager.FindByIdAsync(userId);
+            if (user == null) return NotFound();
+        return Ok(new
+        {
+            user.Email,
+            user.Name,
+            user.Id,
+            Role = (await _userManager.GetRolesAsync(user))[0]
+        });
+    }
+    [Authorize]
+    [HttpPut("edit")]
+    public async Task<IActionResult> Edit([FromBody] UpdateProfiledto dto)
+    {
+        var userId= User.FindFirstValue("uid");
+        if (string.IsNullOrEmpty(userId))
+            return Unauthorized();
+        var user = await _userManager.FindByIdAsync(userId);
+        if (user == null)
+            return NotFound();
+        user.Name = dto.Name;
+        user.Email = dto.Email;
+        user.UserName = dto.Email;
+        var result = await _userManager.UpdateAsync(user);
+        if (!result.Succeeded)
+            return BadRequest();
+        return Ok(new
+        {
+            user.Name,
+            user.Email
+        }
+        );
+    }
         [HttpPost("login")]
         public async Task<IActionResult> Login([FromBody] LoginRequestDto dto)
         {
@@ -123,6 +166,7 @@ namespace AssetMgt.Server.Controllers;
                 Role = role, // ✅ use role from GetRolesAsync
                 Email = user.Email,
                 UserId = user.Id,
+               
                 Expires = expires.ToString("o")
             });
         }

@@ -76,7 +76,8 @@ export default function Notification() {
                     headers: { Authorization: `Bearer ${token}` },
                 });
                 setRequests(res.data);
-               
+                const unreadCount = res.data.filter(r => !r.isRead).length;
+                setRead(unreadCount);
             } catch (err) {
                 console.error("Failed to fetch requests", err);
                 setRequests([]);
@@ -172,9 +173,18 @@ export default function Notification() {
                                       ) : (
                                           requests.map((req, index) => (
                                               <ListItem
-                                                  key={req._id || index}
+                                                  key={req._id}
                                                   component={ListItemButton}
                                                   divider
+                                                  sx={(theme) => ({
+                                                      alignItems: 'flex-start',
+                                                      bgcolor: !req.isRead ? theme.palette.primary.lighter : 'transparent',
+                                                      '&:hover': {
+                                                          bgcolor: !req.isRead
+                                                              ? theme.palette.primary.light
+                                                              : theme.palette.grey[100]
+                                                      }
+                                                  })}
                                               >
                                                   <ListItemAvatar>
                                                       <Avatar sx={{ color: 'primary.main', bgcolor: 'primary.lighter' }}>

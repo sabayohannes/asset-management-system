@@ -14,35 +14,22 @@ import WalletOutlined from '@ant-design/icons/WalletOutlined';
 
 // ==============================|| HEADER PROFILE - PROFILE TAB ||============================== //
 
-export default function ProfileTab() {
+export default function ProfileTab({ onEditProfile, onViewProfile, onLogout }) {
   return (
     <List component="nav" sx={{ p: 0, '& .MuiListItemIcon-root': { minWidth: 32 } }}>
-      <ListItemButton>
+          <ListItemButton onClick={onEditProfile}>
         <ListItemIcon>
           <EditOutlined />
         </ListItemIcon>
         <ListItemText primary="Edit Profile" />
       </ListItemButton>
-      <ListItemButton>
+          <ListItemButton onClick={onViewProfile} >
         <ListItemIcon>
           <UserOutlined />
         </ListItemIcon>
         <ListItemText primary="View Profile" />
-      </ListItemButton>
-
-      <ListItemButton>
-        <ListItemIcon>
-          <ProfileOutlined />
-        </ListItemIcon>
-        <ListItemText primary="Social Profile" />
-      </ListItemButton>
-      <ListItemButton>
-        <ListItemIcon>
-          <WalletOutlined />
-        </ListItemIcon>
-        <ListItemText primary="Billing" />
-      </ListItemButton>
-      <ListItemButton>
+      </ListItemButton>      
+          <ListItemButton onClick={onLogout}>
         <ListItemIcon>
           <LogoutOutlined />
         </ListItemIcon>

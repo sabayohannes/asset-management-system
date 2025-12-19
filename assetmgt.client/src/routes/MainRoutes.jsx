@@ -4,7 +4,8 @@ import { lazy } from 'react';
 import Loadable from 'components/Loadable';
 import DashboardLayout from 'layout/Dashboard';
 import AssetDetails from 'layout/Dashboard/Header/HeaderContent/AssetDetails';
-
+import EditProfile from 'layout/Dashboard/Header/HeaderContent/Profile/EditProfile.jsx'
+import ViewProfile from 'layout/Dashboard/Header/HeaderContent/Profile/viewProfile.jsx'
 const DashboardDefault = Loadable(lazy(() => import('pages/dashboard/default')));
 
 
@@ -22,7 +23,7 @@ const MainRoutes = {
     path: '/',
     element: <DashboardLayout />,
     children: [
-       
+
         {
             path: 'admindashboard',
             element: <DashboardDefault />
@@ -30,16 +31,18 @@ const MainRoutes = {
 
         // USER DASHBOARD (optional)
         //{
-           // path: 'userdashboard',
-            //element: <UserDashboard />
-       // },
+        // path: 'userdashboard',
+        //element: <UserDashboard />
+        // },
 
         // other routes
         { path: 'typography', element: <Typography /> },
         { path: 'color', element: <Color /> },
         { path: 'shadow', element: <Shadow /> },
         { path: 'sample-page', element: <SamplePage /> },
-        { path: 'assets/:id', element: <AssetDetails /> }
+        { path: 'assets/:id', element: <AssetDetails /> },
+        { path: "/edit-profile", element: <EditProfile />},
+        { path:"/view-profile" ,element:<ViewProfile /> } 
     ]
 };
 

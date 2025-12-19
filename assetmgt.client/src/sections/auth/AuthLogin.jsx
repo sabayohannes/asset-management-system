@@ -50,10 +50,18 @@ import EyeInvisibleOutlined from '@ant-design/icons/EyeInvisibleOutlined';
              const role = res.data.role;
              const payload = JSON.parse(atob(token.split('.')[1]));
              const userId = payload.uid;
+             const email = res.data.email;
 
              localStorage.setItem('token', token);
              localStorage.setItem('userId', userId);
              localStorage.setItem('role', role);
+             const user = {
+                 id: userId,
+                 email,
+                 role
+             };
+             localStorage.setItem('user',JSON.stringify(user))
+             console.log(res.data);
         
              setError('');
 

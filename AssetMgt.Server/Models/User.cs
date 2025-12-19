@@ -13,5 +13,8 @@ using System.ComponentModel.DataAnnotations;
     [Required]
     public string Role { get; set; }
 
-    }
+    [Required]
+    public string Name { get; set; }
+
+}
 

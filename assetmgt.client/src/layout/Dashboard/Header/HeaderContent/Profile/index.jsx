@@ -1,6 +1,6 @@
 import PropTypes from 'prop-types';
-import { useRef, useState } from 'react';
-
+import { useRef, useState, useEffect } from 'react';
+import axios from 'axios'
 // material-ui
 import { useTheme } from '@mui/material/styles';
 import ButtonBase from '@mui/material/ButtonBase';
@@ -23,7 +23,7 @@ import Avatar from 'components/@extended/Avatar';
 import MainCard from 'components/MainCard';
 import Transitions from 'components/@extended/Transitions';
 import IconButton from 'components/@extended/IconButton';
-
+import { useNavigate } from 'react-router-dom';
 // assets
 import LogoutOutlined from '@ant-design/icons/LogoutOutlined';
 import SettingOutlined from '@ant-design/icons/SettingOutlined';
@@ -50,13 +50,19 @@ function a11yProps(index) {
 
 export default function Profile() {
   const theme = useTheme();
-
+    
   const anchorRef = useRef(null);
   const [open, setOpen] = useState(false);
   const handleToggle = () => {
     setOpen((prevOpen) => !prevOpen);
   };
+    const navigate = useNavigate();
 
+    const handleLogout = () => {
+        localStorage.removeItem("token");
+        localStorage.removeItem("user");
+        navigate("/login", {replace:true})
+    }
   const handleClose = (event) => {
     if (anchorRef.current && anchorRef.current.contains(event.target)) {
       return;
@@ -65,10 +71,19 @@ export default function Profile() {
   };
 
   const [value, setValue] = useState(0);
-
+    const [user, setUser] = useState(null);
   const handleChange = (event, newValue) => {
     setValue(newValue);
   };
+    useEffect(() => {
+        axios.get('http://localhost:5001/api/auth/me', {
+            headers: {
+                Authorization: `Bearer ${localStorage.getItem('token')}`
+            }
+        }).then(res => {
+            setUser(res.data);
+        });
+    }, []);
 
   return (
     <Box sx={{ flexShrink: 0, ml: 'auto' }}>
@@ -117,16 +132,16 @@ export default function Profile() {
                         <Stack direction="row" sx={{ gap: 1.25, alignItems: 'center' }}>
                           <Avatar alt="profile user" src={avatar1} sx={{ width: 32, height: 32 }} />
                           <Stack>
-                            <Typography variant="h6">John Doe</Typography>
-                            <Typography variant="body2" color="text.secondary">
-                              UI/UX Designer
-                            </Typography>
+                            <Typography variant="h6">{user?.name || 'User'}</Typography>
+<Typography variant="body2" color="text.secondary">
+  {user?.role || ''}
+</Typography>
                           </Stack>
                         </Stack>
                       </Grid>
                       <Grid>
-                        <Tooltip title="Logout">
-                          <IconButton size="large" sx={{ color: 'text.primary' }}>
+                                              <Tooltip title="Logout">
+                                                  <IconButton size="large" sx={{ color: 'text.primary' }} onClick={handleLogout}>
                             <LogoutOutlined />
                           </IconButton>
                         </Tooltip>
@@ -170,9 +185,13 @@ export default function Profile() {
                       />
                     </Tabs>
                   </Box>
-                  <TabPanel value={value} index={0} dir={theme.direction}>
-                    <ProfileTab />
-                  </TabPanel>
+                                  <TabPanel value={value} index={0} dir={theme.direction}>
+                                      <ProfileTab
+                                          onEditProfile={() => navigate('/edit-profile')}
+                                          onViewProfile={() => navigate('/view-profile')}
+                                          onLogout={handleLogout}
+                                      />
+                                  </TabPanel>
                   <TabPanel value={value} index={1} dir={theme.direction}>
                     <SettingTab />
                   </TabPanel>

@@ -211,8 +211,9 @@ export default function OrderTable( ) {
       >
         <Table aria-labelledby="tableTitle">
           <OrderTableHead order={order} orderBy={orderBy} />
-                  <TableBody> {rows && rows.length > 0 ?
-                      (rows.map((row, index) =>
+                  <TableBody>
+                      {rows && rows.length > 0 ? (
+                      rows.map((row, index) =>
                       (<TableRow hover key={row.id || index}>
                           <TableCell>{row.id}</TableCell>
                           <TableCell>{row.asset?.name}</TableCell>
@@ -228,7 +229,14 @@ export default function OrderTable( ) {
                                   onAssign={() => assign(row.id)}
                               />
                           </TableCell>
-                      </TableRow>))) : (<TableRow> <TableCell colSpan={6} align="center">No data available</TableCell> </TableRow>)} </TableBody>
+                      </TableRow>))) : (
+                          <TableRow>
+                              <TableCell colSpan={6} align="center">
+                                  No data available
+                              </TableCell>
+                          </TableRow>
+                      )}
+                  </TableBody>
         </Table>
       </TableContainer>
     </Box>

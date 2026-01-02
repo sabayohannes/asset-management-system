@@ -7,6 +7,7 @@ import AssetDetails from 'layout/Dashboard/Header/HeaderContent/AssetDetails';
 import EditProfile from 'layout/Dashboard/Header/HeaderContent/Profile/EditProfile.jsx'
 import ViewProfile from 'layout/Dashboard/Header/HeaderContent/Profile/viewProfile.jsx'
 const DashboardDefault = Loadable(lazy(() => import('pages/dashboard/default')));
+import CreateAsset from 'pages/component-overview/CreateAsset';
 
 
 //const UserDashboard = Loadable(lazy(() => import('pages/user/UserDashboard')));
@@ -42,7 +43,10 @@ const MainRoutes = {
         { path: 'sample-page', element: <SamplePage /> },
         { path: 'assets/:id', element: <AssetDetails /> },
         { path: "/edit-profile", element: <EditProfile />},
-        { path:"/view-profile" ,element:<ViewProfile /> } 
+        { path: "/view-profile", element: <ViewProfile /> },
+        { path: '/assets/new', element: <CreateAsset /> },
+
+        
     ]
 };
 

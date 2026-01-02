@@ -26,11 +26,14 @@ const utilities = {
   type: 'group',
   children: [
     {
-      id: 'util-typography',
-      title: 'Typography',
-      type: 'item',
-      url: '/typography',
-      icon: icons.FontSizeOutlined
+     
+            id: 'util-assets',
+            title: 'Asset Review',
+            type: 'item',
+            url: '/typography',
+            icon: icons.AppstoreAddOutlined
+        
+
     },
     {
       id: 'util-color',

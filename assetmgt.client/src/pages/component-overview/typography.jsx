@@ -1,236 +1,284 @@
-// material-ui
-import Breadcrumbs from '@mui/material/Breadcrumbs';
-import Divider from '@mui/material/Divider';
-import Grid from '@mui/material/Grid';
-import Link from '@mui/material/Link';
+import * as React from 'react';
+import Alert from '@mui/material/Alert';
+import Box from '@mui/material/Box';
+import Button from '@mui/material/Button';
+import IconButton from '@mui/material/IconButton';
 import Stack from '@mui/material/Stack';
-import Typography from '@mui/material/Typography';
+import Tooltip from '@mui/material/Tooltip';
+import { DataGrid, GridActionsCellItem, gridClasses } from '@mui/x-data-grid';
+import AddIcon from '@mui/icons-material/Add';
+import RefreshIcon from '@mui/icons-material/Refresh';
+import EditIcon from '@mui/icons-material/Edit';
+import DeleteIcon from '@mui/icons-material/Delete';
+import { useLocation, useNavigate, useSearchParams } from 'react-router';
+import useDialogs from "../../hooks/useDialogs/useDialogs";
 
-// project imports
-import MainCard from 'components/MainCard';
+import useNotifications from '../../hooks/useNotifications/useNotifications';
 
-// ==============================|| COMPONENTS - TYPOGRAPHY ||============================== //
+import PageContainer from './PageContainer';
+import { useEffect } from 'react'
+import axios from 'axios';
 
-export default function ComponentTypography() {
-  return (
-    <Grid container spacing={3}>
-      <Grid size={{ xs: 12, lg: 6 }}>
-        <Stack sx={{ gap: 3 }}>
-          <MainCard title="Basic">
-            <Stack sx={{ gap: 0.75, mt: -1.5 }}>
-              <Typography variant="h1">Inter</Typography>
-              <Typography variant="h5">Font Family</Typography>
-              <Breadcrumbs aria-label="breadcrumb">
-                <Typography variant="h6">Regular</Typography>
-                <Typography variant="h6">Medium</Typography>
-                <Typography variant="h6">Bold</Typography>
-              </Breadcrumbs>
-            </Stack>
-          </MainCard>
-          <MainCard title="Heading">
-            <Stack sx={{ gap: 2 }}>
-              <Typography variant="h1">H1 Heading</Typography>
-              <Breadcrumbs aria-label="breadcrumb">
-                <Typography variant="h6">Size: 38px</Typography>
-                <Typography variant="h6">Weight: Bold</Typography>
-                <Typography variant="h6">Line Height: 46px</Typography>
-              </Breadcrumbs>
-              <Divider />
+const INITIAL_PAGE_SIZE = 10;
 
-              <Typography variant="h2">H2 Heading</Typography>
-              <Breadcrumbs aria-label="breadcrumb">
-                <Typography variant="h6">Size: 30px</Typography>
-                <Typography variant="h6">Weight: Bold</Typography>
-                <Typography variant="h6">Line Height: 38px</Typography>
-              </Breadcrumbs>
-              <Divider />
+const pageTitle = "Asset Review";
+export default function AssetList() {
+    const { pathname } = useLocation();
+    const [searchParams] = useSearchParams();
+    const navigate = useNavigate();
+    const [assets, setAssets] = React.useState([])
+    const [rowsState, setRowsState] = React.useState({ rows: [], rowCount: 0 });
+    const [isLoading, setIsLoading] = React.useState(true);
+    const [error, setError] = React.useState(null);
 
-              <Typography variant="h3">H3 Heading</Typography>
-              <Breadcrumbs aria-label="breadcrumb">
-                <Typography variant="h6">Size: 24px</Typography>
-                <Typography variant="h6">Weight: Regular & Bold</Typography>
-                <Typography variant="h6">Line Height: 32px</Typography>
-              </Breadcrumbs>
-              <Divider />
 
-              <Typography variant="h4">H4 Heading</Typography>
-              <Breadcrumbs aria-label="breadcrumb">
-                <Typography variant="h6">Size: 20px</Typography>
-                <Typography variant="h6">Weight: Bold</Typography>
-                <Typography variant="h6">Line Height: 28px</Typography>
-              </Breadcrumbs>
-              <Divider />
+    const fetchAssets = async () => {
+        setIsLoading(true);
+        setError(null);
+        const token = localStorage.getItem("token");
 
-              <Typography variant="h5">H5 Heading</Typography>
-              <Breadcrumbs aria-label="breadcrumb">
-                <Typography variant="h6">Size: 16px</Typography>
-                <Typography variant="h6">Weight: Regular & Medium & Bold</Typography>
-                <Typography variant="h6">Line Height: 24px</Typography>
-              </Breadcrumbs>
-              <Divider />
+        try {
+            const response = await axios.get('http://localhost:5001/api/assets', {
+                headers: { Authorization: `Bearer ${token}` },
+            });
 
-              <Typography variant="h6">H6 Heading / Subheading</Typography>
-              <Breadcrumbs aria-label="breadcrumb">
-                <Typography variant="h6">Size: 14px</Typography>
-                <Typography variant="h6">Weight: Regular</Typography>
-                <Typography variant="h6">Line Height: 22px</Typography>
-              </Breadcrumbs>
-            </Stack>
-          </MainCard>
-          <MainCard title="Body 1">
-            <Typography variant="body1" gutterBottom>
-              Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.
-            </Typography>
-            <Breadcrumbs aria-label="breadcrumb">
-              <Typography variant="h6">Size: 14px</Typography>
-              <Typography variant="h6">Weight: Regular</Typography>
-              <Typography variant="h6">Line Height: 22px</Typography>
-            </Breadcrumbs>
-          </MainCard>
-          <MainCard title="Body 2">
-            <Typography variant="body2" gutterBottom>
-              Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.
-            </Typography>
-            <Breadcrumbs aria-label="breadcrumb">
-              <Typography variant="h6">Size: 12px</Typography>
-              <Typography variant="h6">Weight: Regular</Typography>
-              <Typography variant="h6">Line Height: 20px</Typography>
-            </Breadcrumbs>
-          </MainCard>
-          <MainCard title="Subtitle 1">
-            <Typography variant="subtitle1" gutterBottom>
-              Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.
-            </Typography>
-            <Breadcrumbs aria-label="breadcrumb">
-              <Typography variant="h6">Size: 14px</Typography>
-              <Typography variant="h6">Weight: Medium</Typography>
-              <Typography variant="h6">Line Height: 22px</Typography>
-            </Breadcrumbs>
-          </MainCard>
-          <MainCard title="Subtitle 2">
-            <Typography variant="subtitle2" gutterBottom>
-              Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.
-            </Typography>
-            <Breadcrumbs aria-label="breadcrumb">
-              <Typography variant="h6">Size: 12px</Typography>
-              <Typography variant="h6">Weight: Medium</Typography>
-              <Typography variant="h6">Line Height: 20px</Typography>
-            </Breadcrumbs>
-          </MainCard>
-          <MainCard title="Caption">
-            <Stack sx={{ gap: 1 }}>
-              <Typography variant="caption">
-                Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.
-              </Typography>
-              <Breadcrumbs aria-label="breadcrumb">
-                <Typography variant="h6">Size: 12px</Typography>
-                <Typography variant="h6">Weight: Regular</Typography>
-                <Typography variant="h6">Line Height: 20px</Typography>
-              </Breadcrumbs>
-            </Stack>
-          </MainCard>
-        </Stack>
-      </Grid>
-      <Grid size={{ xs: 12, lg: 6 }}>
-        <Stack sx={{ gap: 3 }}>
-          <MainCard title="Alignment">
-            <Typography variant="body2" gutterBottom>
-              Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.
-              sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.
-            </Typography>
-            <Typography variant="body2" textAlign="center" gutterBottom>
-              Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.
-              sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.
-            </Typography>
-            <Typography variant="body2" textAlign="right">
-              Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.
-              sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.
-            </Typography>
-          </MainCard>
-          <MainCard title="Gutter Bottom">
-            <Typography variant="body1" gutterBottom>
-              Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.
-            </Typography>
-            <Typography variant="body2" gutterBottom>
-              Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.
-            </Typography>
-            <Breadcrumbs aria-label="breadcrumb">
-              <Typography variant="h6">Size: 12px</Typography>
-              <Typography variant="h6">Weight: Regular</Typography>
-              <Typography variant="h6">Line Height: 20px</Typography>
-            </Breadcrumbs>
-          </MainCard>
-          <MainCard title="Overline">
-            <Stack sx={{ gap: 1.5 }}>
-              <Typography variant="overline">
-                Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.
-              </Typography>
-              <Breadcrumbs aria-label="breadcrumb">
-                <Typography variant="h6">Size: 12px</Typography>
-                <Typography variant="h6">Weight: Regular</Typography>
-                <Typography variant="h6">Line Height: 20px</Typography>
-              </Breadcrumbs>
-            </Stack>
-          </MainCard>
-          <MainCard title="Link">
-            <Stack sx={{ gap: 1.5 }}>
-              <Link href="#!">mantisdashboard.com</Link>
-              <Breadcrumbs aria-label="breadcrumb">
-                <Typography variant="h6">Size: 12px</Typography>
-                <Typography variant="h6">Weight: Regular</Typography>
-                <Typography variant="h6">Line Height: 20px</Typography>
-              </Breadcrumbs>
-            </Stack>
-          </MainCard>
-          <MainCard title="Colors">
-            <Typography variant="h6" color="text.primary" gutterBottom>
-              This is a textPrimary text color.
-            </Typography>
-            <Typography variant="h6" color="text.secondary" gutterBottom>
-              This is a textSecondary text color.
-            </Typography>
-            <Typography variant="h6" color="primary" gutterBottom>
-              This is a primary text color.
-            </Typography>
-            <Typography variant="h6" color="secondary" gutterBottom>
-              This is a secondary text color.
-            </Typography>
-            <Typography variant="h6" color="success" gutterBottom>
-              This is a success text color.
-            </Typography>
-            <Typography variant="h6" sx={{ color: 'warning.main' }} gutterBottom>
-              This is a warning text color.
-            </Typography>
-            <Typography variant="h6" color="error" gutterBottom>
-              This is a error text color.
-            </Typography>
-          </MainCard>
-          <MainCard title="Paragraph">
-            <Typography variant="body1" gutterBottom>
-              Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.
-              Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.
-            </Typography>
-            <Breadcrumbs aria-label="breadcrumb">
-              <Typography variant="h6">Size: 14px</Typography>
-              <Typography variant="h6">Weight: Regular</Typography>
-              <Typography variant="h6">Line Height: 22px</Typography>
-            </Breadcrumbs>
-          </MainCard>
-          <MainCard title="Font Style">
-            <Typography variant="body1" gutterBottom sx={{ fontStyle: 'italic' }}>
-              Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.
-            </Typography>
-            <Typography variant="subtitle1" gutterBottom sx={{ fontStyle: 'italic' }}>
-              Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.
-            </Typography>
-            <Breadcrumbs aria-label="breadcrumb">
-              <Typography variant="h6">Size: 14px</Typography>
-              <Typography variant="h6">Weight: Italic Regular & Italic Bold</Typography>
-              <Typography variant="h6">Line Height: 22px</Typography>
-            </Breadcrumbs>
-          </MainCard>
-        </Stack>
-      </Grid>
-    </Grid>
-  );
+            const rows = response.data.map(a => ({
+                id: a.id || a._id,
+                name: a.name,
+                category: a.category,           // adjust if nested: a.category?.name
+                serialNumber: a.serialNumber,   // adjust key if API uses serial_no
+                status: a.status,
+                purchaseDate: a.purchaseDate,
+            }));
+            console.log('Mapped rows:', rows);
+            setRowsState({ rows, rowCount: rows.length });
+            console.log('Raw API response:', response.data);
+        } catch (err) {
+            setError(err);
+            console.error('Error fetching assets:', err);
+        } finally {
+            setIsLoading(false);
+        }
+    };
+
+
+    useEffect(() => {
+        fetchAssets();
+    }, []);
+
+
+
+    const dialogs = useDialogs();
+    const notifications = useNotifications();
+
+    const [paginationModel, setPaginationModel] = React.useState({
+        page: searchParams.get('page') ? Number(searchParams.get('page')) : 0,
+        pageSize: searchParams.get('pageSize')
+            ? Number(searchParams.get('pageSize'))
+            : INITIAL_PAGE_SIZE,
+    });
+    const [filterModel, setFilterModel] = React.useState(
+        searchParams.get('filter')
+            ? JSON.parse(searchParams.get('filter') ?? '')
+            : { items: [] },
+    );
+    const [sortModel, setSortModel] = React.useState(
+        searchParams.get('sort') ? JSON.parse(searchParams.get('sort') ?? '') : [],
+    );
+
+
+
+
+
+    const handlePaginationModelChange = React.useCallback(
+        (model) => {
+            setPaginationModel(model);
+
+            searchParams.set('page', String(model.page));
+            searchParams.set('pageSize', String(model.pageSize));
+
+            const newSearchParamsString = searchParams.toString();
+
+            navigate(
+                `${pathname}${newSearchParamsString ? '?' : ''}${newSearchParamsString}`,
+            );
+        },
+        [navigate, pathname, searchParams],
+    );
+
+    const handleFilterModelChange = React.useCallback(
+        (model) => {
+            setFilterModel(model);
+
+            if (
+                model.items.length > 0 ||
+                (model.quickFilterValues && model.quickFilterValues.length > 0)
+            ) {
+                searchParams.set('filter', JSON.stringify(model));
+            } else {
+                searchParams.delete('filter');
+            }
+
+            const newSearchParamsString = searchParams.toString();
+
+            navigate(
+                `${pathname}${newSearchParamsString ? '?' : ''}${newSearchParamsString}`,
+            );
+        },
+        [navigate, pathname, searchParams],
+    );
+
+    const handleSortModelChange = React.useCallback(
+        (model) => {
+            setSortModel(model);
+
+            if (model.length > 0) {
+                searchParams.set('sort', JSON.stringify(model));
+            } else {
+                searchParams.delete('sort');
+            }
+
+            const newSearchParamsString = searchParams.toString();
+
+            navigate(
+                `${pathname}${newSearchParamsString ? '?' : ''}${newSearchParamsString}`,
+            );
+        },
+        [navigate, pathname, searchParams],
+    );
+
+
+
+
+
+
+
+
+    const handleRowClick = React.useCallback(
+        ({ row }) => {
+            navigate(`/employees/${row.id}`);
+        },
+        [navigate],
+    );
+
+    const handleCreateClick = React.useCallback(() => {
+        navigate('/assets/new');
+    }, [navigate]);
+
+    const handleRowEdit = React.useCallback(
+        (employee) => () => {
+            navigate(`/employees/${employee.id}/edit`);
+        },
+        [navigate],
+    );
+
+    const handleRowDelete = React.useCallback(
+
+        [],
+    );
+
+    const initialState = React.useMemo(
+        () => ({
+            pagination: { paginationModel: { pageSize: INITIAL_PAGE_SIZE } },
+        }),
+        [],
+    );
+
+    const columns = [
+        { field: 'id', headerName: 'ID', width: 70 },
+        { field: 'name', headerName: 'Name', width: 150 },
+        { field: 'category', headerName: 'Category', width: 130 },
+        { field: 'serialNumber', headerName: 'Serial Number', width: 150 },
+        { field: 'status', headerName: 'Status', width: 120 },
+        {
+            field: 'purchaseDate',
+            headerName: 'Purchase Date',
+            width: 130,
+            valueGetter: (params) => {
+                // Make sure params and params.row exist
+                if (!params || !params.row) return '';
+                return params.row.purchaseDate
+                    ? new Date(params.row.purchaseDate).toLocaleDateString()
+                    : '';
+            },
+        },
+    ];
+
+    const pageTitle = "Asset Review";
+
+    return (
+        <PageContainer
+            title={pageTitle}
+            breadcrumbs={[{ title: pageTitle }]}
+            actions={
+                <Stack direction="row" alignItems="center" spacing={1}>
+                    <Tooltip title="Reload data" placement="right" enterDelay={1000}>
+                        <div>
+                            <IconButton size="small" aria-label="refresh" >
+                                <RefreshIcon />
+                            </IconButton>
+                        </div>
+                    </Tooltip>
+                    <Button
+                        variant="contained"
+                        onClick={handleCreateClick}
+                        startIcon={<AddIcon />}
+                    >
+                        Create Asset
+                    </Button>
+                </Stack>
+            }
+        >
+            <Box sx={{ flex: 1, width: '100%' }}>
+                {error ? (
+                    <Box sx={{ flexGrow: 1 }}>
+                        <Alert severity="error">{error.message}</Alert>
+                    </Box>
+                ) : (
+                    <DataGrid
+                        rows={rowsState.rows}
+                        rowCount={rowsState.rowCount}
+                        columns={columns}
+                        pagination
+                        sortingMode="server"
+                        filterMode="server"
+                        paginationMode="server"
+                        paginationModel={paginationModel}
+                        onPaginationModelChange={handlePaginationModelChange}
+                        sortModel={sortModel}
+                        onSortModelChange={handleSortModelChange}
+                        filterModel={filterModel}
+                        onFilterModelChange={handleFilterModelChange}
+                        disableRowSelectionOnClick
+                        onRowClick={handleRowClick}
+                        loading={isLoading}
+                        initialState={initialState}
+                        showToolbar
+                        pageSizeOptions={[5, INITIAL_PAGE_SIZE, 25]}
+                        sx={{
+                            [`& .${gridClasses.columnHeader}, & .${gridClasses.cell}`]: {
+                                outline: 'transparent',
+                            },
+                            [`& .${gridClasses.columnHeader}:focus-within, & .${gridClasses.cell}:focus-within`]:
+                            {
+                                outline: 'none',
+                            },
+                            [`& .${gridClasses.row}:hover`]: {
+                                cursor: 'pointer',
+                            },
+                        }}
+                        slotProps={{
+                            loadingOverlay: {
+                                variant: 'circular-progress',
+                                noRowsVariant: 'circular-progress',
+                            },
+                            baseIconButton: {
+                                size: 'small',
+                            },
+                        }}
+                    />
+                )}
+            </Box>
+        </PageContainer>
+    );
 }

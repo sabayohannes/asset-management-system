@@ -19,15 +19,18 @@ import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import { useNavigate } from 'react-router';
 import dayjs from 'dayjs';
-
-function AssetForm(props) {
+import axios from 'axios'
+function AssetForm({ token, asset, onSuccess, onClose }) {
     const [formValues, setFormValues] = React.useState({
-        name: '',
-        serialNumber: '',
-        purchaseDate: '',
-        category: '',
-        isFullTime: false,
+        name: asset?.name || '',
+        category: asset?.category || '',
+        serialNumber: asset?.serialNumber || '',
+        purchaseDate: asset?.purchaseDate
+            ? asset.purchaseDate.split('T')[0]
+            : '',
+        image: null,
     });
+
 
     const [formErrors, setFormErrors] = React.useState({
         name: '',
@@ -42,19 +45,48 @@ function AssetForm(props) {
 
   const [isSubmitting, setIsSubmitting] = React.useState(false);
 
-  const handleSubmit = React.useCallback(
-    async (event) => {
-      event.preventDefault();
+    const handleSubmit = async (e) => {
+        e.preventDefault();
 
-      setIsSubmitting(true);
-      try {
-        await onSubmit(formValues);
-      } finally {
-        setIsSubmitting(false);
-      }
-    },
-    [formValues, onSubmit],
-  );
+        const formData = new FormData();
+        formData.append('name', formValues.name);
+        formData.append('category', formValues.category);
+        formData.append('serialNumber', formValues.serialNumber);
+        formData.append('purchaseDate', formValues.purchaseDate);
+
+        if (formValues.image instanceof File) {
+            formData.append('Image', formValues.image);
+        }
+
+        try {
+            if (asset) {
+                await axios.put(
+                    `http://localhost:5001/api/assets/${asset.id}`,
+                    formData,
+                    {
+                        headers: {
+                            Authorization: `Bearer ${token}`,
+                        },
+                    }
+                );
+            } else {
+                await axios.post(
+                    'http://localhost:5001/api/assets/assetregister',
+                    formData,
+                    {
+                        headers: {
+                            Authorization: `Bearer ${token}`,
+                        },
+                    }
+                );
+            }
+
+            onSuccess();
+            if (onClose) onClose();
+        } catch (err) {
+            console.error('Asset save error:', err);
+        }
+    };
 
     const handleTextFieldChange = (event) => {
         setFormValues((prev) => ({
@@ -66,7 +98,7 @@ function AssetForm(props) {
     const handleNumberFieldChange = (event) => {
         setFormValues((prev) => ({
             ...prev,
-            [event.target.name]: Number(event.target.value),
+            [event.target.name]: (event.target.value),
         }));
     };
     const handleSelectFieldChange = (event) => {
@@ -76,39 +108,27 @@ function AssetForm(props) {
         }));
     };
 
-  const handleCheckboxFieldChange = React.useCallback(
-    (event, checked) => {
-      onFieldChange(event.target.name, checked);
-    },
-    [onFieldChange],
-  );
 
-    const handleDateFieldChange = (fieldName) => (value) => {
+    const handleDateFieldChange = (value) => {
         setFormValues((prev) => ({
             ...prev,
-            [fieldName]: value?.isValid() ? value.toISOString() : '',
+            purchaseDate: value ? value.format('YYYY-MM-DD') : '',
         }));
     };
 
 
  
-  const handleReset = React.useCallback(() => {
-    if (onReset) {
-      onReset(formValues);
-    }
-  }, [formValues, onReset]);
+  
 
-  const handleBack = React.useCallback(() => {
-    navigate(backButtonPath ?? '/employees');
-  }, [navigate, backButtonPath]);
-
+    const handleBack = () => {
+        navigate(-1);
+    };
   return (
     <Box
       component="form"
       onSubmit={handleSubmit}
       noValidate
       autoComplete="off"
-      onReset={handleReset}
       sx={{ width: '100%' }}
     >
       <FormGroup>
@@ -127,40 +147,33 @@ function AssetForm(props) {
           <Grid size={{ xs: 12, sm: 6 }} sx={{ display: 'flex' }}>
             <TextField
              type="number"
-             value={formValues.SerialNumber ?? ''}
+             value={formValues.serialNumber ?? ''}
              onChange={handleNumberFieldChange}
-             name="SerialNumber"
+             name="serialNumber"
              label="SerialNumber"
-             error={!!formErrors.SerialNumber}
-             helperText={formErrors.SerialNumber ?? ' '}
+             error={!!formErrors.serialNumber}
+             helperText={formErrors.serialNumber ?? ' '}
               fullWidth
             />
           </Grid>
           <Grid size={{ xs: 12, sm: 6 }} sx={{ display: 'flex' }}>
             <LocalizationProvider dateAdapter={AdapterDayjs}>
-              <DatePicker
-               value={formValues.joinDate ? dayjs(formValues.joinDate) : null}
-               onChange={handleDateFieldChange('PurchaseDate')}
-               name="PurchaseDate"
-               label="PurchaseDate"
-                slotProps={{
-                  textField: {
-                        error: !!formErrors.PurchaseDate,
-                        helperText: formErrors.PurchaseDate ?? ' ',
-                    fullWidth: true,
-                  },
-                }}
-              />
+                          <DatePicker
+                              label="Purchase Date"
+                              value={formValues.purchaseDate ? dayjs(formValues.purchaseDate) : null}
+                              onChange={handleDateFieldChange}
+                          />
+
             </LocalizationProvider>
           </Grid>
           <Grid size={{ xs: 12, sm: 6 }} sx={{ display: 'flex' }}>
-           <FormControl error={!!formErrors.Category} fullWidth>
+           <FormControl error={!!formErrors.category} fullWidth>
              <InputLabel id="asset-Category-label">Category</InputLabel>
               <Select
-                value={formValues.Category ?? ''}
+                value={formValues.category ?? ''}
                 onChange={handleSelectFieldChange}
                 labelId="asset-Category-label"
-                name="Category"
+                name="category"
                 label="Category"
                 defaultValue=""
                 fullWidth
@@ -169,22 +182,24 @@ function AssetForm(props) {
                 <MenuItem value="Finance">hardware</MenuItem>
                 <MenuItem value="Development">other</MenuItem>
               </Select>
-                          <FormHelperText>{formErrors.Category ?? ' '}</FormHelperText>
+                          <FormHelperText>{formErrors.category ?? ' '}</FormHelperText>
             </FormControl>
           </Grid>
           <Grid size={{ xs: 12, sm: 6 }} sx={{ display: 'flex' }}>
             <FormControl>
-              <FormControlLabel
-                name="isFullTime"
-                control={
-                  <Checkbox
-                    size="large"
-                    checked={formValues.isFullTime ?? false}
-                    onChange={handleCheckboxFieldChange}
-                  />
-                }
-                label="Full-time"
-              />
+            
+                          <Box mt={2}>
+                              <input
+                                  type="file"
+                                  accept="image/*"
+                                  onChange={(e) =>
+                                      setFormValues((prev) => ({
+                                          ...prev,
+                                          image: e.target.files[0],
+                                      }))
+                                  }
+                              />
+                          </Box>
               <FormHelperText error={!!formErrors.isFullTime}>
                 {formErrors.isFullTime ?? ' '}
               </FormHelperText>
@@ -200,41 +215,26 @@ function AssetForm(props) {
         >
           Back
         </Button>
-        <Button
-          type="submit"
-          variant="contained"
-          size="large"
-          loading={isSubmitting}
-        >
-          {submitButtonLabel}
-        </Button>
+              <Button
+                  type="submit"
+                  variant="contained"
+                  size="large"
+                  disabled={isSubmitting}
+              >
+                  {asset ? 'Update Asset' : 'Add Asset'}
+              </Button>
+
       </Stack>
     </Box>
   );
 }
 
 AssetForm.propTypes = {
-    backButtonPath: PropTypes.string,
-    formState: PropTypes.shape({
-        errors: PropTypes.shape({
-            name: PropTypes.string,
-            serialNumber: PropTypes.string,
-            purchaseDate: PropTypes.string,
-            category: PropTypes.string,
-            isFullTime: PropTypes.string,
-        }).isRequired,
-        values: PropTypes.shape({
-            name: PropTypes.string,
-            serialNumber: PropTypes.string,
-            purchaseDate: PropTypes.string,
-            category: PropTypes.string,
-            isFullTime: PropTypes.bool,
-        }).isRequired,
-    }).isRequired,
-    onFieldChange: PropTypes.func.isRequired,
-    onReset: PropTypes.func,
-    onSubmit: PropTypes.func.isRequired,
-    submitButtonLabel: PropTypes.string.isRequired,
+    token: PropTypes.string.isRequired,
+    asset: PropTypes.object,
+    onSuccess: PropTypes.func.isRequired,
+    onClose: PropTypes.func,
 };
+
 
 export default AssetForm;

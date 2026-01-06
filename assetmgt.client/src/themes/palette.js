@@ -52,7 +52,7 @@ export function buildPalette(presetColor) {
       action: { disabled: extendedLight.grey[300] },
       divider: extendedLight.grey[200],
       background: {
-        paper: extendedLight.grey[0],
+          paper: '#e8f5e9',
         default: extendedLight.grey.A50
       }
     }

@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
+
 import { useNavigate } from 'react-router-dom'
 import {
     Container,
@@ -184,7 +185,20 @@ function AdminDashboard() {
                     </Typography>
                     <Grid container spacing={2}>
                         <Grid item xs={6} sm={3}>
-                            <Paper sx={{ p: 2, textAlign: "center" }}>
+                            <Paper
+                                elevation={0}
+                                sx={{
+                                    p: 2,
+                                    textAlign: 'center',
+                                    minHeight: 120,
+                                    display: 'flex',
+                                    flexDirection: 'column',
+                                    justifyContent: 'center',
+                                    '--mui-palette-background-paper': '#e8f5e9',
+                                    borderRadius: 2
+                                }}
+                            >
+
                                 <Typography>Total Assets</Typography>
                                 <Typography variant="h5">{assets.length}</Typography>
                             </Paper>

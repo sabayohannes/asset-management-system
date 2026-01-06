@@ -18,78 +18,20 @@ export default function CreateAsset() {
 
     const notifications = useNotifications();
 
-    const [formState, setFormState] = React.useState(() => ({
-        values: INITIAL_FORM_VALUES,
-        errors: {},
-    }));
-    const formValues = formState.values;
-    const formErrors = formState.errors;
+    
 
-    const setFormValues = React.useCallback((newFormValues) => {
-        setFormState((previousState) => ({
-            ...previousState,
-            values: newFormValues,
-        }));
-    }, []);
+    const handleSuccess = () => {
+        notifications.show('Asset created successfully.', {
+            severity: 'success',
+            autoHideDuration: 3000,
+        });
+        navigate('/assets'); // or wherever you want to go after success
+    };
 
-    const setFormErrors = React.useCallback((newFormErrors) => {
-        setFormState((previousState) => ({
-            ...previousState,
-            errors: newFormErrors,
-        }));
-    }, []);
+    const handleClose = () => {
+        navigate(-1); // go back to the previous page
+    };
 
-    const handleFormFieldChange = React.useCallback(
-        (name, value) => {
-            const validateField = async (values) => {
-                const { issues } = validateEmployee(values);
-                setFormErrors({
-                    ...formErrors,
-                    [name]: issues?.find((issue) => issue.path?.[0] === name)?.message,
-                });
-            };
-
-            const newFormValues = { ...formValues, [name]: value };
-
-            setFormValues(newFormValues);
-            validateField(newFormValues);
-        },
-        [formValues, formErrors, setFormErrors, setFormValues],
-    );
-
-    const handleFormReset = React.useCallback(() => {
-        setFormValues(INITIAL_FORM_VALUES);
-    }, [setFormValues]);
-
-    const handleFormSubmit = React.useCallback(async () => {
-        const { issues } = validateEmployee(formValues);
-        if (issues && issues.length > 0) {
-            setFormErrors(
-                Object.fromEntries(issues.map((issue) => [issue.path?.[0], issue.message])),
-            );
-            return;
-        }
-        setFormErrors({});
-
-        try {
-            await createEmployee(formValues);
-            notifications.show('Employee created successfully.', {
-                severity: 'success',
-                autoHideDuration: 3000,
-            });
-
-            navigate('/employees');
-        } catch (createError) {
-            notifications.show(
-                `Failed to create employee. Reason: ${createError.message}`,
-                {
-                    severity: 'error',
-                    autoHideDuration: 3000,
-                },
-            );
-            throw createError;
-        }
-    }, [formValues, navigate, notifications, setFormErrors]);
 
     return (
         <PageContainer
@@ -97,11 +39,10 @@ export default function CreateAsset() {
             breadcrumbs={[{ title: 'Asset', path: '/employees' }, { title: 'New' }]}
         >
             <AssetForm
-                formState={formState}
-                onFieldChange={handleFormFieldChange}
-                onSubmit={handleFormSubmit}
-                onReset={handleFormReset}
-                submitButtonLabel="Create"
+             
+                token={localStorage.getItem('token')} // or wherever your auth token is
+                onSuccess={handleSuccess}
+                onClose={handleClose}
             />
         </PageContainer>
     );

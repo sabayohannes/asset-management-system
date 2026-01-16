@@ -16,7 +16,7 @@ import MenuItem from '@mui/material/MenuItem';
 import Stack from '@mui/material/Stack';
 import Typography from '@mui/material/Typography';
 import Box from '@mui/material/Box';
-
+import PlusOutlined from '@ant-design/icons/PlusOutlined';
 import LinearProgress from '@mui/material/LinearProgress';
 import CircleIcon from '@mui/icons-material/Circle';
 
@@ -26,7 +26,7 @@ import AnalyticEcommerce from 'components/cards/statistics/AnalyticEcommerce';
 import MonthlyBarChart from 'sections/dashboard/default/MonthlyBarChart';
 import ReportAreaChart from 'sections/dashboard/default/ReportAreaChart';
 import UniqueVisitorCard from 'sections/dashboard/default/UniqueVisitorCard';
-import SaleReportCard from 'sections/dashboard/default/SaleReportCard';
+import AssetReportCard from 'sections/dashboard/default/AssetReportCard';
 import OrdersTable from 'sections/dashboard/default/OrdersTable';
 
 // assets
@@ -96,24 +96,27 @@ export default function DashboardDefault() {
     };
 
     const assetRequestsPerMonth = () => {
-        const months = [
-            'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'
-        ];
+        const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
 
-        const monthlyData = months.map((month, index) => {
-            const monthNumber = index; // 0 = Jan
-            const total = assets.filter(asset => new Date(asset.purchaseDate).getMonth() === monthNumber).length;
-            const approved = assets.filter(
-                asset => new Date(asset.purchaseDate).getMonth() === monthNumber && asset.status === 'Approved'
-            ).length;
-            const pending = assets.filter(
-                asset => new Date(asset.purchaseDate).getMonth() === monthNumber && asset.status === 'Pending'
+        return months.map((month, index) => {
+            const monthNumber = index;
+
+            // Match the logic: only process if purchaseDate exists
+            const monthlyTotal = assets.filter(asset => {
+                if (!asset.purchaseDate) return false;
+                const date = new Date(asset.purchaseDate);
+                return !isNaN(date) && date.getMonth() === monthNumber;
+            }).length;
+
+            // Apply similar logic for approved/pending
+            const approved = assets.filter(asset =>
+                asset.purchaseDate &&
+                new Date(asset.purchaseDate).getMonth() === monthNumber &&
+                asset.status === 'Approved'
             ).length;
 
-            return { name: month, total, approved, pending };
+            return { name: month, total: monthlyTotal, approved, pending: monthlyTotal - approved };
         });
-
-        return monthlyData;
     };
 
 
@@ -169,10 +172,11 @@ console.log(localStorage.getItem('token'))
   const handleAnalyticsMenuClose = () => {
     setAnalyticsMenuAnchor(null);
   };
-  
+    const monthlyData = assetRequestsPerMonth();
     return (
       <>
-    <Grid container rowSpacing={4.5} columnSpacing={2.75}>
+            <Grid container rowSpacing={4.5} columnSpacing={2.75}
+                >
       {/* row 1 */}
       <Grid sx={{ mb: -2.25 }} size={12}>
         <Typography variant="h5">Well come Admin </Typography>
@@ -255,312 +259,85 @@ console.log(localStorage.getItem('token'))
                            />
         </Box>
                 </Grid>
-      <Grid sx={{ display: { sm: 'none', md: 'block', lg: 'none' } }} size={{ md: 8 }} />
-          {/* row 2 */}
-          <Grid size={{ xs: 12, md: 7, lg: 8 }}>
-              <Grid container sx={{ alignItems: 'center', justifyContent: 'space-between' }}>
-                  <Grid>
-                      <Typography variant="h5">Assets Requests</Typography>
-                  </Grid>
-                  <Grid>
-                      <IconButton onClick={handleOrderMenuClick}>
-                          <EllipsisOutlined style={{ fontSize: '1.25rem' }} />
-                      </IconButton>
-                      <Menu
-                          id="fade-menu"
-                          slotProps={{ list: { 'aria-labelledby': 'fade-button' } }}
-                          anchorEl={orderMenuAnchor}
-                          onClose={handleOrderMenuClose}
-                          open={Boolean(orderMenuAnchor)}
-                          anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}
-                          transformOrigin={{ vertical: 'top', horizontal: 'right' }}
-                      >
-                          <MenuItem onClick={handleOrderMenuClose}>Export as CSV</MenuItem>
-                          <MenuItem onClick={handleOrderMenuClose}>Export as Excel</MenuItem>
-                          <MenuItem onClick={handleOrderMenuClose}>Print Table</MenuItem>
-                      </Menu>
-                  </Grid>
-              </Grid>
-              <MainCard sx={{ mt: 1 }} content={false}>
-                  <OrdersTable />
-              </MainCard>
-          </Grid>
       
-      <Grid size={{ xs: 12, md: 5, lg: 4 }}>
-                    <Grid container sx={{ alignItems: 'center', justifyContent: 'space-between' }}>
-                        <Grid>
-                            <Typography variant="h5">
-                                {openFormModal ? (selectedAsset ? "Edit Asset" : "Add Asset") : "Assets Overview"}
-                            </Typography>
-                        </Grid>
-                        <Grid>
-                            {!openFormModal && (
-                                <Button variant="contained" onClick={handleOpenForm}>
-                                    Add Asset
-                                </Button>
-                            )}
-                        </Grid>
-                    </Grid>
-
-                    {/* IF form is open, show form ONLY here */}
-                    {openFormModal ? (
-                        <Box sx={{ mt: 2 }}>
-                            <AssetForm
-                                token={localStorage.getItem("token")}
-                                asset={selectedAsset}
-                                onSuccess={() => {
-                                    fetchAssets();
-                                    setOpenFormModal(false);
-                                    handleCloseForm();
-                                }}
-                                onClose={() => {
-                                  
-                                     handleCloseForm ()
-                                }}
-                            />
-                        </Box>
-                    ) : (
-                        /* Otherwise show Assets Overview */
-                        <MainCard sx={{ mt: 2, p: 2 }}>
-                            <Typography variant="h6" sx={{ mb: 2 }}>
-                                All Assets
-                                </Typography>
-                                <Box
-                                    sx={{
-                                        maxHeight: 'calc(70px * 4 + 16px * 4)',
-                                        overflowY: 'auto',
-                                        '&::-webkit-scrollbar': {
-                                            width: '6px',
-                                        },
-                                        '&::-webkit-scrollbar-thumb': {
-                                            backgroundColor: 'rgba(0,0,0,0.2)',
-                                            borderRadius: '3px',
-                                        },
-                                    }}
-                                >
-                                
-                                {assets.map((a) => (
-                                    <Box key={a.id} sx={{
-                                        p: 1, borderBottom: '1px solid #eee', display: "flex", gap: 2, alignItems: 'center',
-
-                                    }}>
-
-                                        <img
-                                            src={a.imageUrl}
-                                            alt={a.name}
-                                            style={{ width: "70px", height: "70px", borderRadius: "6px", objectFit: "cover", border: "1px solid #ddd" }}
-                                        />
-
-                                        <Box sx={{ flex: 1 }}>
-                                            <Typography><b>{a.name}</b></Typography>
-                                            <Typography variant="body2">Category: {a.category}</Typography>
-                                            <Typography variant="body2">Serial: {a.serialNumber}</Typography>
-                                            <Typography variant="body2">Status: {a.status}</Typography>
-                                        </Box>
-
-                                        <IconButton
-                                            onClick={(e) => {
-                                                setAssetMenuAnchor(e.currentTarget);
-                                                setMenuAssetId(a.id);
-                                            }}
-                                        >
-                                            <EllipsisOutlined style={{ fontSize: '1.25rem' ,color: 'blue' }} />
-                                        </IconButton>
-
-                                        <Menu
-                                            anchorEl={assetMenuAnchor}
-                                            open={menuAssetId === a.id}
-                                            onClose={() => setAssetMenuAnchor(null)}
-                                            anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}
-                                            transformOrigin={{ vertical: 'top', horizontal: 'right' }}
-                                        >
-                                            <MenuItem onClick={() => { setSelectedAsset(a); setOpenFormModal(true); setAssetMenuAnchor(null); }}>
-                                                Edit
-                                            </MenuItem>
-                                            <MenuItem onClick={() => { handleDelete(a.id); setAssetMenuAnchor(null); }}>
-                                                Delete
-                                            </MenuItem>
-                                        </Menu>
-
-                                    </Box>
-                                ))}</Box>
-
-
-                        </MainCard>
-                    )}
+                        
+                 
 </Grid>
 
+      
       {/* row 3 */}
-        
-      <Grid size={{ xs: 12, md: 5, lg: 4 }}>
-        <Grid container sx={{ alignItems: 'center', justifyContent: 'space-between' }}>
-          <Grid>
-            <Typography variant="h5">Asset Report</Typography>
-          </Grid>
-          <Grid>
-            <IconButton onClick={handleAnalyticsMenuClick}>
-              <EllipsisOutlined style={{ fontSize: '1.25rem' }} />
-            </IconButton>
-            <Menu
-              id="fade-menu"
-              slotProps={{ list: { 'aria-labelledby': 'fade-button' } }}
-              anchorEl={analyticsMenuAnchor}
-              open={Boolean(analyticsMenuAnchor)}
-              onClose={handleAnalyticsMenuClose}
-              anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}
-              transformOrigin={{ vertical: 'top', horizontal: 'right' }}
-            >
-              <MenuItem onClick={handleAnalyticsMenuClose}>Weekly</MenuItem>
-              <MenuItem onClick={handleAnalyticsMenuClose}>Monthly</MenuItem>
-              <MenuItem onClick={handleAnalyticsMenuClose}>Yearly</MenuItem>
-            </Menu>
-          </Grid>
-        </Grid>
-        <MainCard sx={{ mt: 2 }} content={false}>
-          <List sx={{ p: 0, '& .MuiListItemButton-root': { py: 2 } }}>
-                      <ListItemButton divider>
-                          <ListItemText primary="Total Assets" />
-                          <Typography variant="h5">{totalAssets}</Typography>
-                      </ListItemButton>
-                      <ListItemButton divider>
-                          <ListItemText primary="Available Assets" />
-                          <Typography variant="h5">{availableAssets}</Typography>
-                      </ListItemButton>
-                      <ListItemButton divider>
-                          <ListItemText primary="Approved Assets" />
-                          <Typography variant="h5">{approvedAssets}</Typography>
-                      </ListItemButton>
-                      <ListItemButton>
-                          <ListItemText primary="Assets Added This Year" />
-                          <Typography variant="h5">{assetsAddedThisYear}</Typography>
-                      </ListItemButton>
-
-          </List>
-                  <ReportAreaChart chartData={assetRequestsPerMonth()} />
-        </MainCard>
-      </Grid>
-      {/* row 4 */}
       <Grid size={{ xs: 12, md: 7, lg: 8 }}>
-        <SaleReportCard />
+                <AssetReportCard
+                    data={monthlyData}
+                    total={totalAssets}
+                />
       </Grid>
       <Grid size={{ xs: 12, md: 5, lg: 4 }}>
         <Grid container sx={{ alignItems: 'center', justifyContent: 'space-between' }}>
           <Grid>
-            <Typography variant="h5">Transaction History</Typography>
+            <Typography variant="h5">Asset Request History</Typography>
           </Grid>
           <Grid />
         </Grid>
         <MainCard sx={{ mt: 2 }} content={false}>
-                  <List
-
-            component="nav"
-            sx={{
-              px: 0,
-              py: 0,
-              '& .MuiListItemButton-root': {
-                py: 1.5,
-                px: 2,
-                '& .MuiAvatar-root': avatarSX,
-                '& .MuiListItemSecondaryAction-root': { ...actionSX, position: 'relative' }
-              }
-            }}
-          >
-            <ListItem
-              component={ListItemButton}
-              divider
-              secondaryAction={
-                <Stack sx={{ alignItems: 'flex-end' }}>
-                  <Typography variant="subtitle1" noWrap>
-                    + $1,430
-                  </Typography>
-                  <Typography variant="h6" color="secondary" noWrap>
-                    78%
-                  </Typography>
-                </Stack>
-              }
-            >
-              <ListItemAvatar>
-                <Avatar sx={{ color: 'success.main', bgcolor: 'success.lighter' }}>
-                  <GiftOutlined />
-                </Avatar>
-              </ListItemAvatar>
-              <ListItemText primary={<Typography variant="subtitle1">Order #002434</Typography>} secondary="Today, 2:00 AM" />
-            </ListItem>
-            <ListItem
-              component={ListItemButton}
-              divider
-              secondaryAction={
-                <Stack sx={{ alignItems: 'flex-end' }}>
-                  <Typography variant="subtitle1" noWrap>
-                    + $302
-                  </Typography>
-                  <Typography variant="h6" color="secondary" noWrap>
-                    8%
-                  </Typography>
-                </Stack>
-              }
-            >
-              <ListItemAvatar>
-                <Avatar sx={{ color: 'primary.main', bgcolor: 'primary.lighter' }}>
-                  <MessageOutlined />
-                </Avatar>
-              </ListItemAvatar>
-              <ListItemText primary={<Typography variant="subtitle1">Order #984947</Typography>} secondary="5 August, 1:45 PM" />
-            </ListItem>
-            <ListItem
-              component={ListItemButton}
-              secondaryAction={
-                <Stack sx={{ alignItems: 'flex-end' }}>
-                  <Typography variant="subtitle1" noWrap>
-                    + $682
-                  </Typography>
-                  <Typography variant="h6" color="secondary" noWrap>
-                    16%
-                  </Typography>
-                </Stack>
-              }
-            >
-              <ListItemAvatar>
-                <Avatar sx={{ color: 'error.main', bgcolor: 'error.lighter' }}>
-                  <SettingOutlined />
-                </Avatar>
-              </ListItemAvatar>
-              <ListItemText primary={<Typography variant="subtitle1">Order #988784</Typography>} secondary="7 hours ago" />
-            </ListItem>
-          </List>
+                    <List component="nav" sx={{ /* your existing styles */ }}>
+                        {assetRequests.slice(0, 5).map((request, index) => (
+                            <ListItem
+                                key={request._id || index}
+                                component={ListItemButton}
+                                divider={index !== assetRequests.slice(0, 5).length - 1}
+                            >
+                                <ListItemAvatar>
+                                    <Avatar sx={{
+                                        color: request.status === 'Approved' ? 'success.main' : 'warning.main',
+                                        bgcolor: request.status === 'Approved' ? 'success.lighter' : 'warning.lighter'
+                                    }}>
+                                        {request.status === 'Approved' ? <GiftOutlined /> : <MessageOutlined />}
+                                    </Avatar>
+                                </ListItemAvatar>
+                                <ListItemText
+                                    primary={<Typography variant="subtitle1">{request.assetName || 'New Request'}</Typography>}
+                                    secondary={
+                                        request.requestDate // Use your specific date field (createdAt or purchaseDate)
+                                            ? new Date(request.requestDate).toLocaleDateString()
+                                            : '-'
+                                    }
+                                />
+                                <Stack sx={{ alignItems: 'flex-end' }}>
+                                    <Typography variant="subtitle1" color={request.status === 'Rejected' ? 'error' : 'inherit'}>
+                                        {request.status}
+                                    </Typography>
+                                </Stack>
+                            </ListItem>
+                        ))}
+                        {assetRequests.length === 0 && (
+                            <ListItem><ListItemText primary="No recent updates" /></ListItem>
+                        )}
+                    </List>
         </MainCard>
-        <MainCard sx={{ mt: 2 }}>
-          <Stack sx={{ gap: 3 }}>
-            <Grid container sx={{ alignItems: 'center', justifyContent: 'space-between' }}>
-              <Grid>
-
-
-
-                <Stack>
-                  <Typography variant="h5" noWrap>
-                    Help & Support Chat
-                  </Typography>
-                  <Typography variant="caption" color="secondary" noWrap>
-                    Typical replay within 5 min
-                  </Typography>
-                </Stack>
-              </Grid>
-              <Grid>
-                <AvatarGroup sx={{ '& .MuiAvatar-root': { width: 32, height: 32 } }}>
-                  <Avatar alt="Remy Sharp" src={avatar1} />
-                  <Avatar alt="Travis Howard" src={avatar2} />
-                  <Avatar alt="Cindy Baker" src={avatar3} />
-                  <Avatar alt="Agnes Walker" src={avatar4} />
-                </AvatarGroup>
-              </Grid>
-            </Grid>
-            <Button size="small" variant="contained" sx={{ textTransform: 'capitalize' }}>
-              Need Help?
-            </Button>
-          </Stack>
-        </MainCard>
+                <MainCard sx={{ mt: 2 }}>
+                    <Stack sx={{ gap: 2 }}>
+                        <Typography variant="h5">Quick Actions</Typography>
+                        <Button
+                            variant="contained"
+                            startIcon={<PlusOutlined />}
+                            onClick={handleOpenForm} // Use your existing form opener
+                            fullWidth
+                        >
+                            Add New Asset
+                        </Button>
+                        <Button
+                            variant="outlined"
+                            color="secondary"
+                            fullWidth
+                            onClick={() => window.print()}
+                        >
+                            Export Asset Inventory
+                        </Button>
+                    </Stack>
+                </MainCard>
       </Grid>
-      </Grid>
+
             
 
 

@@ -7,7 +7,7 @@ import TextField from '@mui/material/TextField';
 import Typography from '@mui/material/Typography';
 
 // project imports
-import SalesChart from 'sections/dashboard/SalesChart';
+import AssetChart from 'sections/dashboard/default/AssetChart';
 
 // sales report status
 const status = [
@@ -27,14 +27,14 @@ const status = [
 
 // ==============================|| DEFAULT - SALES REPORT ||============================== //
 
-export default function SaleReportCard() {
+export default function AssetReportCard() {
   const [value, setValue] = useState('today');
 
   return (
     <>
       <Grid container sx={{ alignItems: 'center', justifyContent: 'space-between' }}>
         <Grid>
-          <Typography variant="h5">Sales Report</Typography>
+          <Typography variant="h5">Asset Report</Typography>
         </Grid>
         <Grid>
           <TextField
@@ -53,7 +53,7 @@ export default function SaleReportCard() {
           </TextField>
         </Grid>
       </Grid>
-      <SalesChart />
+          <AssetChart type={value} />
     </>
   );
 }

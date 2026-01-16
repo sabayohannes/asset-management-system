@@ -49,6 +49,7 @@ export default function AssetList() {
                 serialNumber: a.serialNumber,   // adjust key if API uses serial_no
                 status: a.status,
                 purchaseDate: a.purchaseDate,
+                imageUrl: a.imageUrl, 
             }));
             console.log('Mapped rows:', rows);
             setRowsState({ rows, rowCount: rows.length });
@@ -155,19 +156,19 @@ export default function AssetList() {
 
 
     const handleRowClick = React.useCallback(
-        ({ row }) => {
-            navigate(`/employees/${row.id}`);
+        (params) => {
+            if (params.field === 'actions') return;
+            navigate(`/assets/edit/${params.id}`);
         },
         [navigate],
     );
-
     const handleCreateClick = React.useCallback(() => {
         navigate('/assets/new');
     }, [navigate]);
 
     const handleRowEdit = React.useCallback(
         (employee) => () => {
-            navigate(`/employees/${employee.id}/edit`);
+            navigate(`/assets/edit/${row.id}`); 
         },
         [navigate],
     );
@@ -185,6 +186,31 @@ export default function AssetList() {
     );
 
     const columns = [
+        {
+            field: 'imageUrl',
+            headerName: 'Image',
+            width: 100,
+            sortable: false,
+            filterable: false,
+            renderCell: (params) => (
+                params.value ? (
+                    <img
+                        src={params.value}
+                        alt="asset"
+                        style={{
+                            width: 50,
+                            height: 50,
+                            objectFit: 'cover',
+                            borderRadius: 6,
+                            border: '1px solid #ddd'
+                        }}
+                    />
+                ) : (
+                    <span>No Image</span>
+                )
+            ),
+        },
+
         { field: 'id', headerName: 'ID', width: 70 },
         { field: 'name', headerName: 'Name', width: 150 },
         { field: 'category', headerName: 'Category', width: 130 },
@@ -193,16 +219,32 @@ export default function AssetList() {
         {
             field: 'purchaseDate',
             headerName: 'Purchase Date',
-            width: 130,
-            valueGetter: (params) => {
-                // Make sure params and params.row exist
-                if (!params || !params.row) return '';
-                return params.row.purchaseDate
-                    ? new Date(params.row.purchaseDate).toLocaleDateString()
-                    : '';
-            },
+            width: 200,
+            renderCell: (params) =>
+                params.value
+                    ? new Date(params.value).toLocaleDateString()
+                    : '-',
         },
-    ];
+        {
+            field: 'actions',
+            type: 'actions',
+            headerName: 'Actions',
+            width: 100,
+            getActions: (params) => [
+                <GridActionsCellItem
+                    icon={<EditIcon />}
+                    label="Edit"
+                    onClick={() => navigate(`/assets/edit/${params.id}`)}
+                />,
+                <GridActionsCellItem
+                    icon={<DeleteIcon />}
+                    label="Delete"
+                    onClick={() => handleDeleteAsset(params.id)}
+                />
+            ],
+        },
+
+        ];
 
     const pageTitle = "Asset Review";
 

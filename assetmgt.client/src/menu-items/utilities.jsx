@@ -28,9 +28,9 @@ const utilities = {
     {
      
             id: 'util-assets',
-            title: 'Asset Review',
+            title: 'AssetReview',
             type: 'item',
-            url: '/typography',
+            url: '/assetreview',
             icon: icons.AppstoreAddOutlined
         
 

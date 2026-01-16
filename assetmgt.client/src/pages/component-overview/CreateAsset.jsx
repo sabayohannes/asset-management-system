@@ -1,17 +1,11 @@
 ﻿import * as React from 'react';
 import { useNavigate } from 'react-router';
 import useNotifications from '../../hooks/useNotifications/useNotifications';
-import {
-    createOne as createEmployee,
-    validate as validateEmployee,
-} from './data/employees';
+
 import AssetForm from './AssetForm';
 import PageContainer from './PageContainer';
 
-const INITIAL_FORM_VALUES = {
-    role: 'Market',
-    isFullTime: true,
-};
+
 
 export default function CreateAsset() {
     const navigate = useNavigate();

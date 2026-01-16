@@ -1,35 +1,36 @@
 // assets
-import { LoginOutlined, ProfileOutlined } from '@ant-design/icons';
+import { LoginOutlined, ProfileOutlined, FileAddOutlined, FileOutlined } from '@ant-design/icons';
 
 // icons
 const icons = {
   LoginOutlined,
-  ProfileOutlined
+  ProfileOutlined,
+    FileAddOutlined,
+ FileOutlined
 };
 
 // ==============================|| MENU ITEMS - EXTRA PAGES ||============================== //
 
 const pages = {
-  id: 'authentication',
-  title: 'Authentication',
+    id: 'group-dashboard',
+    title: 'Navigation',
   type: 'group',
   children: [
-    {
-      id: 'login1',
-      title: 'Login',
-      type: 'item',
-      url: '/login',
-      icon: icons.LoginOutlined,
-      target: true
-    },
-    {
-      id: 'register1',
-      title: 'Register',
-      type: 'item',
-      url: '/register',
-      icon: icons.ProfileOutlined,
-      target: true
-    }
+      {
+          id: 'asset-requests',
+          title: 'Asset Requests',
+          type: 'item',
+          url: 'assets/requests',
+          icon: icons.FileAddOutlined
+      },
+    
+      {
+          id: 'asset-report',
+          title: 'Asset Report',
+          type: 'item',
+          url: 'assets/reports',
+          icon: icons.FileAddOutlined
+      },
   ]
 };
 

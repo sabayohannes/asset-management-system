@@ -13,14 +13,14 @@ const dashboard = {
   title: 'Navigation',
   type: 'group',
   children: [
-    {
-      id: 'dashboard',
-      title: 'Dashboard',
-      type: 'item',
-      url: '/dashboard/default',
-      icon: icons.DashboardOutlined,
-      breadcrumbs: false
-    }
+      {
+          id: 'dashboard',
+          title: 'Dashboard',
+          type: 'item',
+          url: '/admindashboard',      
+          icon: icons.DashboardOutlined,
+          breadcrumbs: false
+      },
   ]
 };
 

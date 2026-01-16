@@ -1,6 +1,5 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
-
 import { useNavigate } from 'react-router-dom'
 import {
     Container,
@@ -11,240 +10,87 @@ import {
     TableHead,
     TableRow,
     Button,
-    Alert,
+    Grid,
+    Paper,
     Tabs,
-    Tab,Grid,Paper
+    Tab
 } from "@mui/material";
 
 function AdminDashboard() {
-    const [requests, setRequests] = useState([]);
-    const [message, setMessage] = useState("");
     const [tableIndex, setTabIndex] = useState(0);
-    const [assets, setAssets] = useState([])
+    const [assets, setAssets] = useState([]);
     const navigate = useNavigate();
     const token = localStorage.getItem("token");
 
     useEffect(() => {
-        fetchRequests();
         fetchAsset();
     }, []);
 
-    const fetchRequests = async () => {
+    const fetchAsset = async () => {
         try {
-            const res = await axios.get("http://localhost:5001/api/assetrequests/all", {
-                headers: { Authorization: `Bearer ${token}` },
-            });
-            setRequests(res.data);
-        } catch (err) {
-            console.error("Error loading requests:", err);
-            setMessage("Failed to load requests");
-        }
-    };
-
-    const handleApprove = async (id) => {
-        try {
-            const res = await axios.post(
-                `http://localhost:5001/api/assetrequests/requests/${id}/approve`,
-                {},
-                { headers: { Authorization: `Bearer ${token}` } }
-            );
-            setMessage(res.data.message);
-            fetchRequests();
-        } catch (err) {
-            console.error("Approve error:", err);
-            setMessage("Failed to approve request");
-        }
-    };
-
-    const handleReject = async (id) => {
-        try {
-            const res = await axios.post(
-                `http://localhost:5001/api/assetrequests/requests/${id}/reject`,
-                {},
-                { headers: { Authorization: `Bearer ${token}` } }
-            );
-            setMessage(res.data.message);
-            fetchRequests();
-        } catch (err) {
-            console.error("Reject error:", err);
-            setMessage("Failed to reject request");
-        }
-    };
-    const addasset = () => {
-        navigate('/AddAsset')
-    }
-    const handleTabChange = (event,newValue) => {
-        setTabIndex(newValue)
-    }
-    const fetchAsset = async() => {
-        try {
-
             const res = await axios.get("http://localhost:5001/api/assets", {
-                headers: {
-                    Authorization: `Bearer ${token}`,
-                }
+                headers: { Authorization: `Bearer ${token}` }
             });
-                setAssets(res.data)
-            
-
+            setAssets(res.data);
         } catch (err) {
             console.error("Error loading assets", err);
-            setMessage("failed to load asset");
         }
     }
+
+    const addAsset = () => {
+        navigate('/AddAsset')
+    }
+
+    const handleTabChange = (event, newValue) => {
+        setTabIndex(newValue);
+    }
+
     return (
         <Container sx={{ mt: 20 }}>
-            
-            <Typography variant="h4" gutterBottom sx={{fontStyle:'italic'} }>
-                Requests for asset
-            </Typography>
+            <Button
+                sx={{ backgroundColor: "#1976d2", "&:hover": { backgroundColor: "#115293" }, mb: 2 }}
+                onClick={addAsset}
+            >
+                Add new Asset
+            </Button>
 
-            {message && (
-                <Alert severity="info" sx={{ mb: 2 }}>
-                    {message}
-                </Alert>
-            )}
+            <Tabs value={tableIndex} onChange={handleTabChange}>
+                <Tab label="Assets" />
+                <Tab label="Overview" />
+            </Tabs>
 
-            {requests.length === 0 ? (
-                <Typography>No asset requests found</Typography>
-            ) : (
+            {tableIndex === 0 && (
                 <Table>
                     <TableHead>
                         <TableRow>
-                            <TableCell>Request ID</TableCell>
                             <TableCell>Asset Name</TableCell>
                             <TableCell>Category</TableCell>
                             <TableCell>Status</TableCell>
-                            <TableCell>Request Date</TableCell>
-                            <TableCell>Actions</TableCell>
                         </TableRow>
                     </TableHead>
-
                     <TableBody>
-                        {requests.map((r) => (
-                            <TableRow key={r.id}>
-                                <TableCell>{r.id}</TableCell>
-                                <TableCell>{r.asset?.name}</TableCell>
-                                <TableCell>{r.asset?.category}</TableCell>
-                                <TableCell>{r.status}</TableCell>
-                                <TableCell>
-                                    {new Date(r.requestDate).toLocaleDateString()}
-                                </TableCell>
-                                <TableCell>
-                                    {r.status === "Pending" ? (
-                                        <>
-                                            <Button
-                                                variant="contained"
-                                                color="success"
-                                                onClick={() => handleApprove(r.id)}
-                                            >
-                                                Approve
-                                            </Button>
-                                            <Button
-                                                variant="contained"
-                                                color="error"
-                                                sx={{ ml: 1 }}
-                                                onClick={() => handleReject(r.id)}
-                                            >
-                                                Reject
-                                            </Button>
-                                        </>
-                                    ) : (
-                                        <Typography>{r.status}</Typography>
-                                    )}
-                                </TableCell>
+                        {assets.map((a) => (
+                            <TableRow key={a.id}>
+                                <TableCell>{a.name}</TableCell>
+                                <TableCell>{a.category}</TableCell>
+                                <TableCell>{a.status}</TableCell>
                             </TableRow>
                         ))}
                     </TableBody>
                 </Table>
-            )}
-                <Button sx={{
-                    backgroundColor: "#1976d2",
-                    "&:hover": { backgroundColor: "#115293" },
-                }} onClick={() => addasset()}>Add new Asset</Button>
-            <Tabs
-                value={tableIndex}
-                onChange={handleTabChange}
-                sx={{
-                    borderBottom: 1,
-                  
-                    mb: 3,
-                    "& .Mui-selected": {
-                        fontWeight: "bold",
-                        textDecoration: "underline",
-                        textUnderlineOffset: "6px"
-                    },
-                }
-            }            >
-                <Tab label="overView on asset" />
-                <Tab label="open assets" /></Tabs>
-            {tableIndex === 0 && (
-                <div>
-                    <Typography variant="h6" gutterBottom>
-                        Asset Overview
-                    </Typography>
-                    <Grid container spacing={2}>
-                        <Grid item xs={6} sm={3}>
-                            <Paper
-                                elevation={0}
-                                sx={{
-                                    p: 2,
-                                    textAlign: 'center',
-                                    minHeight: 120,
-                                    display: 'flex',
-                                    flexDirection: 'column',
-                                    justifyContent: 'center',
-                                    '--mui-palette-background-paper': '#e8f5e9',
-                                    borderRadius: 2
-                                }}
-                            >
-
-                                <Typography>Total Assets</Typography>
-                                <Typography variant="h5">{assets.length}</Typography>
-                            </Paper>
-                        </Grid>
-                        <Grid item xs={6} sm={3}>
-                            <Paper sx={{ p: 2, textAlign: "center" }}>
-                                <Typography>Pending Requests</Typography>
-                                <Typography variant="h5">{requests.filter(r => r.status === 'Pending').length}</Typography>
-                            </Paper>
-                        </Grid>
-                        <Grid item xs={6} sm={3}>
-                            <Paper sx={{ p: 2, textAlign: "center" }}>
-                                <Typography>Approved Requests</Typography>
-                                <Typography variant="h5">{requests.filter(r => r.status === 'Approved').length}</Typography>
-                            </Paper>
-                        </Grid>
-                        <Grid item xs={6} sm={3}>
-                            <Paper sx={{ p: 2, textAlign: "center" }}>
-                                <Typography>Rejected Requests</Typography>
-                                <Typography variant="h5">{requests.filter(r => r.status === 'Rejected').length}</Typography>
-                            </Paper>
-                        </Grid>
-                    </Grid>
-                </div>
             )}
 
 
             {tableIndex === 1 && (
-                <Table>
-                    <TableHead>
-                        <TableRow>
-                            <TableCell>Asset Name</TableCell>
-                            <TableCell>Category</TableCell>
-                            <TableCell>Status</TableCell>
-                        </TableRow>
-                    </TableHead>
-                    <TableBody>
-                        {requests.map((r) => (
-                            <TableRow key={r.id}>
-                                <TableCell>{r.asset?.name}</TableCell>
-                                <TableCell>{r.asset?.category}</TableCell>
-                                <TableCell>{r.status}</TableCell>
-                            </TableRow>
-                        ))}
-                    </TableBody>
-                </Table>
+                <Grid container spacing={2} sx={{ mt: 2 }}>
+                    <Grid item xs={6} sm={3}>
+                        <Paper sx={{ p: 2, textAlign: 'center', borderRadius: 2 }}>
+                            <Typography>Total Assets</Typography>
+                            <Typography variant="h5">{assets.length}</Typography>
+                        </Paper>
+                    </Grid>
+                    {/* Add more overview cards as needed */}
+                </Grid>
             )}
         </Container>
     );

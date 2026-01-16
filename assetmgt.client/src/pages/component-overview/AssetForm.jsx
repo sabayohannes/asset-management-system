@@ -30,7 +30,21 @@ function AssetForm({ token, asset, onSuccess, onClose }) {
             : '',
         image: null,
     });
-
+    // This ensures that when the asset data is loaded from the API, 
+    // the form fields update immediately.
+    React.useEffect(() => {
+        if (asset) {
+            setFormValues({
+                name: asset.name || '',
+                category: asset.category || '',
+                serialNumber: asset.serialNumber || '',
+                purchaseDate: asset.purchaseDate
+                    ? asset.purchaseDate.split('T')[0]
+                    : '',
+                image: null,
+            });
+        }
+    }, [asset]);
 
     const [formErrors, setFormErrors] = React.useState({
         name: '',
@@ -208,13 +222,13 @@ function AssetForm({ token, asset, onSuccess, onClose }) {
         </Grid>
       </FormGroup>
       <Stack direction="row" spacing={2} justifyContent="space-between">
-        <Button
-          variant="contained"
-          startIcon={<ArrowBackIcon />}
-          onClick={handleBack}
-        >
-          Back
-        </Button>
+              <Button
+                  startIcon={<ArrowBackIcon />}
+                  onClick={() => navigate('/assetreview')}
+                  sx={{ mb: 3, textTransform: 'none', fontWeight: 600 }}
+              >
+                  Back to List
+              </Button>
               <Button
                   type="submit"
                   variant="contained"

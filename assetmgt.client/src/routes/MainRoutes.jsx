@@ -45,7 +45,7 @@ const MainRoutes = {
         { path: 'sample-page', element: <SamplePage /> },
         { path: 'assets/requests', element: <AssetRequests /> },
         { path: 'assets/edit/:assetId', element: <AssetEdit /> },
-       { path: 'assets/:assetId', element: <AssetDetail/> },//
+        { path: 'assets/:assetId', element: <AssetDetail/> },//
 
         { path: "/edit-profile", element: <EditProfile />},
         { path: "/view-profile", element: <ViewProfile /> },

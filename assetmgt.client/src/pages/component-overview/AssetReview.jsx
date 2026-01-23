@@ -167,7 +167,7 @@ export default function AssetList() {
     }, [navigate]);
 
     const handleRowEdit = React.useCallback(
-        (employee) => () => {
+        (asset) => () => {
             navigate(`/assets/edit/${row.id}`); 
         },
         [navigate],
@@ -184,7 +184,39 @@ export default function AssetList() {
         }),
         [],
     );
+    const handleDeleteAsset = async (assetId) => {
+     
+        const token = localStorage.getItem('token');
 
+    
+        if (!window.confirm("Are you sure you want to delete this asset?")) {
+            return;
+        }
+
+        try {
+           
+            await axios.delete(`http://localhost:5001/api/assets/${assetId}`, {
+                headers: {
+                    Authorization: `Bearer ${token}`
+                }
+            });
+
+            
+            fetchAssets(); // Call your function that gets the asset list
+            alert("Asset deleted successfully");
+
+        } catch (err) {
+            console.error('Error deleting asset:', err);
+            // Handle 401 (Unauthorized) or 403 (Forbidden) errors
+            if (err.response?.status === 401) {
+                alert("Session expired. Please log in again.");
+            } else if (err.response?.status === 403) {
+                alert("You do not have permission to delete assets (Admin only).");
+            } else {
+                alert("Failed to delete asset.");
+            }
+        }
+    };
     const columns = [
         {
             field: 'imageUrl',

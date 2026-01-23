@@ -1,5 +1,6 @@
-import { useState, useEffect } from 'react';
-import  axios  from 'axios';
+﻿import { useState, useEffect } from 'react';
+import axios from 'axios';
+import {useNavigate} from 'react-router-dom'
 // material-ui
 import Avatar from '@mui/material/Avatar';
 import AvatarGroup from '@mui/material/AvatarGroup';
@@ -19,7 +20,8 @@ import Box from '@mui/material/Box';
 import PlusOutlined from '@ant-design/icons/PlusOutlined';
 import LinearProgress from '@mui/material/LinearProgress';
 import CircleIcon from '@mui/icons-material/Circle';
-
+import ButtonBase from '@mui/material/ButtonBase'
+import ArrowRightOutlined from '@ant-design/icons/ArrowRightOutlined';
 // project imports
 import MainCard from 'components/MainCard';
 import AnalyticEcommerce from 'components/cards/statistics/AnalyticEcommerce';
@@ -34,7 +36,8 @@ import EllipsisOutlined from '@ant-design/icons/EllipsisOutlined';
 import GiftOutlined from '@ant-design/icons/GiftOutlined';
 import MessageOutlined from '@ant-design/icons/MessageOutlined';
 import SettingOutlined from '@ant-design/icons/SettingOutlined';
-
+import DeploymentUnitOutlined from '@ant-design/icons/DeploymentUnitOutlined';
+import { CloseCircleOutlined } from '@ant-design/icons';
 import avatar1 from 'assets/images/users/avatar-1.png';
 import avatar2 from 'assets/images/users/avatar-2.png';
 import avatar3 from 'assets/images/users/avatar-3.png';
@@ -70,6 +73,7 @@ export default function DashboardDefault() {
     const [selectedAsset, setSelectedAsset] = useState(null);
     const [assetMenuAnchor, setAssetMenuAnchor] = useState(null);
     const [menuAssetId, setMenuAssetId] = useState(null);
+    const navigate=useNavigate();
     const handleDelete = async (assetId) => {
         const token = localStorage.getItem('token'); // get your token
         try {
@@ -118,7 +122,33 @@ export default function DashboardDefault() {
             return { name: month, total: monthlyTotal, approved, pending: monthlyTotal - approved };
         });
     };
+    const exportToCSV = () => {
+        // 1. Define the headers you want
+        const headers = ['Asset Name', 'Category', 'Status', 'Purchase Date', 'Value'];
 
+        // 2. Map your data to match the headers
+        const rows = assets.map(asset => [
+            `"${asset.name || asset.assetName}"`,
+            `"${asset.category}"`,
+            `"${asset.status}"`,
+            `"${new Date(asset.purchaseDate).toLocaleDateString()}"`,
+            `"${asset.value || 0}"`
+        ]);
+
+        // 3. Combine headers and rows
+        const csvContent = [headers, ...rows].map(e => e.join(",")).join("\n");
+
+        // 4. Create a download link and click it automatically
+        const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+        const url = URL.createObjectURL(blob);
+        const link = document.createElement("a");
+        link.setAttribute("href", url);
+        link.setAttribute("download", `Asset_Inventory_${new Date().toLocaleDateString()}.csv`);
+        link.style.visibility = 'hidden';
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+    };
 
     const totalAssets = assets.length;
     const currentYear = new Date().getFullYear();
@@ -181,97 +211,227 @@ console.log(localStorage.getItem('token'))
       <Grid sx={{ mb: -2.25 }} size={12}>
         <Typography variant="h5">Well come Admin </Typography>
       </Grid>
+               <Grid size={{ xs: 12, sm: 6, lg: 3 }}>
+                    <MainCard
+                        content={false}
+                        sx={{
+                            position: 'relative',
+                            overflow: 'hidden',
+                            bgcolor: '#00c0ef', // Total Assets Blue
+                            color: '#fff',
+                            height: '126px',
+                            border: 'none',
+                            borderRadius: '16px', // Nice, modern rounded corners
+                            boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)',
+                            '&:hover .watermark-icon': {
+                                transform: 'translateY(6px) scale(1.15)',
+                                opacity: 0.25
+                            }
+                        }}
+                    >
+                        {/* Watermark */}
+                        <Box className="watermark-icon" sx={{
+                            position: 'absolute', top: '8px', right: '12px', fontSize: '55px',
+                            color: '#000', opacity: 0.12, transition: 'all 0.3s ease-in-out', zIndex: 0
+                        }}>
+                            <GiftOutlined />
+                        </Box>
+
+                        {/* Content */}
+                        <Box sx={{ p: 2.25, position: 'relative', zIndex: 1 }}>
+                            <Typography variant="h3" color="inherit" sx={{ fontWeight: 700 }}>{totalAssets}</Typography>
+                            <Typography variant="subtitle1" color="inherit" sx={{ fontWeight: 500, opacity: 0.9 }}>Total Assets</Typography>
+                        </Box>
+
+                        {/* More Info Button - Curved to match the card */}
+                        <ButtonBase onClick={() => navigate('/AssetReview')} sx={{
+                            width: '100%', py: 0.8, position: 'absolute', bottom: 0,
+                            bgcolor: 'rgba(0,0,0,0.12)', zIndex: 2,
+                            '&:hover': { bgcolor: 'rgba(0,0,0,0.22)' }
+                        }}>
+                            <Stack direction="row" spacing={1} alignItems="center" sx={{ justifyContent: 'center', width: '100%' }}>
+                                <Typography variant="caption" sx={{ color: '#fff', fontWeight: 600 }}>view all</Typography>
+                                <ArrowRightOutlined style={{ fontSize: '10px', color: '#fff' }} />
+                            </Stack>
+                        </ButtonBase>
+                    </MainCard>
+                </Grid>
       <Grid size={{ xs: 12, sm: 6, lg: 3 }}>
-                    <Box
+                    <MainCard
+                        content={false}
                         sx={{
-                            transition: 'all 0.3s ease',
-                            '&:hover': {
-                                transform: 'translateY(-8px)',
-                                boxShadow: '0px 8px 20px rgba(0,0,0,0.15)',
-                                cursor: 'pointer'
-                            }
+                            position: 'relative', overflow: 'hidden', bgcolor: '#00a65a', color: '#fff',
+                            height: '126px', border: 'none', borderRadius: '16px',
+                            boxShadow: '0 4px 6px -1px rgba(0,0,0,0.1)',
+                            '&:hover .watermark-icon': { transform: 'translateY(6px) scale(1.15)', opacity: 0.25 }
                         }}
                     >
-              <AnalyticEcommerce
-                  title="Total Assets"
-                  count={totalAssets}
-                        />
-                   </Box>
+                        <Box className="watermark-icon" sx={{ position: 'absolute', top: '8px', right: '12px', fontSize: '55px', color: '#000', opacity: 0.12, transition: '0.3s', zIndex: 0 }}>
+                            <SettingOutlined />
+                        </Box>
+                        <Box sx={{ p: 2.25, position: 'relative', zIndex: 1 }}>
+                            <Typography variant="h3" color="inherit" sx={{ fontWeight: 700 }}>{availableAssets}</Typography>
+                            <Typography variant="subtitle1" color="inherit" sx={{ fontWeight: 500, opacity: 0.9 }}>Available Assets</Typography>
+                        </Box>
+                        <ButtonBase onClick={() => navigate('/AssetReview')} sx={{ width: '100%', py: 0.8, position: 'absolute', bottom: 0, bgcolor: 'rgba(0,0,0,0.12)', zIndex: 2, '&:hover': { bgcolor: 'rgba(0,0,0,0.22)' } }}>
+                            <Stack direction="row" spacing={1} alignItems="center" sx={{ justifyContent: 'center', width: '100%' }}>
+                                <Typography variant="caption" sx={{ color: '#fff', fontWeight: 600 }}>view all</Typography>
+                                <ArrowRightOutlined style={{ fontSize: '10px' }} />
+                            </Stack>
+                        </ButtonBase>
+                    </MainCard>
+                </Grid>
+      <Grid size={{ xs: 12, sm: 6, lg: 3 }}>
+                    <MainCard
+                        content={false}
+                        sx={{
+                            position: 'relative', overflow: 'hidden', bgcolor: '#f39c12', color: '#fff',
+                            height: '126px', border: 'none', borderRadius: '16px',
+                            boxShadow: '0 4px 6px -1px rgba(0,0,0,0.1)',
+                            '&:hover .watermark-icon': { transform: 'translateY(6px) scale(1.15)', opacity: 0.25 }
+                        }}
+                    >
+                        <Box className="watermark-icon" sx={{ position: 'absolute', top: '8px', right: '12px', fontSize: '55px', color: '#000', opacity: 0.12, transition: '0.3s', zIndex: 0 }}>
+                            <MessageOutlined />
+                        </Box>
+                        <Box sx={{ p: 2.25, position: 'relative', zIndex: 1 }}>
+                            <Typography variant="h3" color="inherit" sx={{ fontWeight: 700 }}>{approvedAssets}</Typography>
+                            <Typography variant="subtitle1" color="inherit" sx={{ fontWeight: 500, opacity: 0.9 }}>Approved Assets</Typography>
+                        </Box>
+                        <ButtonBase onClick={() => navigate('/AssetReview')} sx={{ width: '100%', py: 0.8, position: 'absolute', bottom: 0, bgcolor: 'rgba(0,0,0,0.12)', zIndex: 2, '&:hover': { bgcolor: 'rgba(0,0,0,0.22)' } }}>
+                            <Stack direction="row" spacing={1} alignItems="center" sx={{ justifyContent: 'center', width: '100%' }}>
+                                <Typography variant="caption" sx={{ color: '#fff', fontWeight: 600 }}>view all</Typography>
+                                <ArrowRightOutlined style={{ fontSize: '10px' }} />
+                            </Stack>
+                        </ButtonBase>
+                    </MainCard>
       </Grid>
-                <Grid size={{ xs: 12, sm: 6, lg: 3 }}>
-                    <Box
-                        sx={{
-                            transition: 'all 0.3s ease',
-                            '&:hover': {
-                                transform: 'translateY(-8px)',
-                                boxShadow: '0px 8px 20px rgba(0,0,0,0.15)',
-                                cursor: 'pointer'
-                            }
-                        }}
-                    >
-              <AnalyticEcommerce
-                  title="AvailableAssets"
-                            count={availableAssets}
-                            percentage={totalAssets
-                                ? ((availableAssets / totalAssets) * 100).toFixed(1)
-                                : 0}
+      <Grid size={{ xs: 12, sm: 6, lg: 3 }}>
+                   
+                        <MainCard
+                            content={false}
+                            sx={{
+                                position: 'relative', overflow: 'hidden', bgcolor: '#dd4b39', color: '#fff',
+                                height: '126px', border: 'none', borderRadius: '16px',
+                                boxShadow: '0 4px 6px -1px rgba(0,0,0,0.1)',
+                                '&:hover .watermark-icon': { transform: 'translateY(6px) scale(1.15)', opacity: 0.25 }
+                            }}
+                        >
+                            <Box className="watermark-icon" sx={{ position: 'absolute', top: '8px', right: '12px', fontSize: '55px', color: '#000', opacity: 0.12, transition: '0.3s', zIndex: 0 }}>
+                                <CloseCircleOutlined />
+                            </Box>
+                            <Box sx={{ p: 2.25, position: 'relative', zIndex: 1 }}>
+                                <Typography variant="h3" color="inherit" sx={{ fontWeight: 700 }}>{rejectedAssets}</Typography>
+                                <Typography variant="subtitle1" color="inherit" sx={{ fontWeight: 500, opacity: 0.9 }}>Rejected Assets</Typography>
+                            </Box>
+                            <ButtonBase onClick={() => navigate('/AssetReview')} sx={{ width: '100%', py: 0.8, position: 'absolute', bottom: 0, bgcolor: 'rgba(0,0,0,0.12)', zIndex: 2, '&:hover': { bgcolor: 'rgba(0,0,0,0.22)' } }}>
+                                <Stack direction="row" spacing={1} alignItems="center" sx={{ justifyContent: 'center', width: '100%' }}>
+                                    <Typography variant="caption" sx={{ color: '#fff', fontWeight: 600 }}>view all</Typography>
+                                    <ArrowRightOutlined style={{ fontSize: '10px' }} />
+                                </Stack>
+                            </ButtonBase>
+                        </MainCard>
                   
-                        />
-              </Box>
-      </Grid>
-                <Grid size={{ xs: 12, sm: 6, lg: 3 }}>
-                    <Box
-                        sx={{
-                            transition: 'all 0.3s ease',
-                            '&:hover': {
-                                transform: 'translateY(-8px)',
-                                boxShadow: '0px 8px 20px rgba(0,0,0,0.15)',
-                                cursor: 'pointer'
-                            }
-                        }}
-                    >
-              <AnalyticEcommerce
-                  title="Approved Assets"
-                  count={approvedAssets}
-                            percentage={totalAssets
-                                ? ((approvedAssets / totalAssets) * 100).toFixed(1)
-                                : 0}
-                  extra={`${pendingAssets} pending`}
-                        />
-                    </Box>
-      </Grid>
-                <Grid size={{ xs: 12, sm: 6, lg: 3 }}>
-                    <Box
-                        sx={{
-                            transition: 'all 0.3s ease',
-                            '&:hover': {
-                                transform: 'translateY(-8px)',
-                                boxShadow: '0px 8px 20px rgba(0,0,0,0.15)',
-                                cursor: 'pointer'
-                            }
-                        }}
-                    >
-                        <AnalyticEcommerce title="Rejected Assets"
-                            count={rejectedAssets}
-                            percentage={totalAssets
-                                ? ((rejectedAssets / totalAssets) * 100).toFixed(1)
-                                : 0}
-                           />
-        </Box>
                 </Grid>
       
-                        
-                 
-</Grid>
+            
+   </Grid>
 
       
-      {/* row 3 */}
-      <Grid size={{ xs: 12, md: 7, lg: 8 }}>
-                <AssetReportCard
-                    data={monthlyData}
-                    total={totalAssets}
-                />
-      </Grid>
+            {/* row 2 */}
+            <Grid item xs={12} sx={{ mt: 3 }}>
+                <MainCard
+                    content={false}
+                    sx={{
+                        borderRadius: '16px',
+                        overflow: 'hidden',
+                        border: 'none',
+                        boxShadow: '0 4px 20px rgba(0,0,0,0.08)',
+                        width: '100%'
+                    }}
+                >
+                    {/* Added alignItems="stretch" here to ensure both sides have equal height */}
+                    <Grid container alignItems="stretch">
+
+                        {/* LEFT SIDE: Branding */}
+                        <Grid
+                            item
+                            xs={12}
+                            md={6} // Explicitly 6 out of 12 columns
+                            sx={{
+                                background: 'linear-gradient(135deg, #00c0ef 0%, #0073b7 100%)',
+                                display: 'flex',
+                                flexDirection: 'column',
+                                alignItems: 'center',
+                                justifyContent:'flex-start',
+                                p: 7,
+                                color: '#fff',
+                                position: 'relative',
+                                overflow: 'hidden',
+                                minHeight: '500px' // Ensures a consistent base height
+                            }}
+                        >
+                            {/* Decorative Elements */}
+                            <Box sx={{ position: 'absolute', top: -20, left: -20, width: 150, height: 150, borderRadius: '50%', bgcolor: 'rgba(255,255,255,0.1)' }} />
+
+                            <Box sx={{
+                                bgcolor: 'rgba(255,255,255,0.2)',
+                                p: 3,
+                                borderRadius: '24px',
+                                backdropFilter: 'blur(10px)',
+                                mb: 3,
+                                boxShadow: '0 10px 30px rgba(0,0,0,0.1)'
+                            }}>
+                                <DeploymentUnitOutlined style={{ fontSize: '60px', color: '#fff' }} />
+                            </Box>
+
+                            <Typography variant="h2" sx={{ fontWeight: 800, textAlign: 'center', lineHeight: 1.1, letterSpacing: '-1px' }}>
+                                ASSET <br /> MANAGEMENT
+                            </Typography>
+
+                            <Box sx={{ mt: 3, px: 3, py: 0.7, bgcolor: 'rgba(0,0,0,0.15)', borderRadius: '30px' }}>
+                                <Typography variant="subtitle2" sx={{ fontWeight: 600, textTransform: 'uppercase', letterSpacing: '1px' }}>
+                                    System Analytics
+                                </Typography>
+                            </Box>
+                        </Grid>
+
+                        {/* RIGHT SIDE: Report Chart */}
+                        <Grid
+                            item
+                            xs={12}
+                            md={6} // Explicitly 6 out of 12 columns
+                            sx={{
+                                p: { xs: 3, md: 6 },
+                                bgcolor: '#fff',
+                                display: 'flex',
+                                flexDirection: 'column',
+                                justifyContent: 'center',
+                                // This ensures it fills the 50% height if the left side is taller
+                                flexGrow: 1
+                            }}
+                        >
+                            <Box sx={{ mb: 4 }}>
+                                <Typography variant="h3" sx={{ fontWeight: 700, mb: 1 }}>Request Performance</Typography>
+                                <Typography variant="body1" color="textSecondary">
+                                    Monthly overview of asset distribution and approval rates.
+                                </Typography>
+                            </Box>
+
+                            <Box sx={{ 
+        flexGrow: 1, 
+        width: '100%', 
+        mt: -1, // Negative margin pulls the chart UP towards the title
+        display: 'flex',
+        flexDirection: 'column',
+        '& .apexcharts-canvas': { margin: '0 auto' } // Centers the chart if needed
+    }}>
+                                <AssetReportCard data={monthlyData} total={totalAssets} />
+                            </Box>
+                        </Grid>
+                    </Grid>
+                </MainCard>
+            </Grid>
       <Grid size={{ xs: 12, md: 5, lg: 4 }}>
         <Grid container sx={{ alignItems: 'center', justifyContent: 'space-between' }}>
           <Grid>
@@ -321,7 +481,7 @@ console.log(localStorage.getItem('token'))
                         <Button
                             variant="contained"
                             startIcon={<PlusOutlined />}
-                            onClick={handleOpenForm} // Use your existing form opener
+                            onClick={() => navigate('/assets/new')}
                             fullWidth
                         >
                             Add New Asset
@@ -330,7 +490,7 @@ console.log(localStorage.getItem('token'))
                             variant="outlined"
                             color="secondary"
                             fullWidth
-                            onClick={() => window.print()}
+                            onClick={exportToCSV}
                         >
                             Export Asset Inventory
                         </Button>

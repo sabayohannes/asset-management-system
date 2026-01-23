@@ -19,7 +19,7 @@ export default function CreateAsset() {
             severity: 'success',
             autoHideDuration: 3000,
         });
-        navigate('/assets'); // or wherever you want to go after success
+        navigate('/AssetReview'); // or wherever you want to go after success
     };
 
     const handleClose = () => {
@@ -30,7 +30,7 @@ export default function CreateAsset() {
     return (
         <PageContainer
             title="New Asset"
-            breadcrumbs={[{ title: 'Asset', path: '/employees' }, { title: 'New' }]}
+            breadcrumbs={[{ title: 'Asset', path: '/AssetReview' }, { title: 'New' }]}
         >
             <AssetForm
              

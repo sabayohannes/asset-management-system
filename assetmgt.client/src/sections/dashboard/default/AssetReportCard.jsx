@@ -5,6 +5,8 @@ import Grid from '@mui/material/Grid';
 import MenuItem from '@mui/material/MenuItem';
 import TextField from '@mui/material/TextField';
 import Typography from '@mui/material/Typography';
+import Stack from '@mui/material/Stack'
+import Box from '@mui/material/Box';
 
 // project imports
 import AssetChart from 'sections/dashboard/default/AssetChart';
@@ -27,33 +29,40 @@ const status = [
 
 // ==============================|| DEFAULT - SALES REPORT ||============================== //
 
-export default function AssetReportCard() {
-  const [value, setValue] = useState('today');
+export default function AssetReportCard({ data, total }) {
+    const [value, setValue] = useState('year'); // Default to year to see the monthly trend
 
-  return (
-    <>
-      <Grid container sx={{ alignItems: 'center', justifyContent: 'space-between' }}>
-        <Grid>
-          <Typography variant="h5">Asset Report</Typography>
-        </Grid>
-        <Grid>
-          <TextField
-            id="standard-select-currency"
-            size="small"
-            select
-            value={value}
-            onChange={(e) => setValue(e.target.value)}
-            slotProps={{ htmlInput: { sx: { py: 0.75, fontSize: '0.875rem' } } }}
-          >
-            {status.map((option) => (
-              <MenuItem key={option.value} value={option.value}>
-                {option.label}
-              </MenuItem>
-            ))}
-          </TextField>
-        </Grid>
-      </Grid>
-          <AssetChart type={value} />
-    </>
-  );
+    return (
+        <>
+            <Grid container sx={{ alignItems: 'center', justifyContent: 'space-between' }}>
+                <Grid>
+                    <Stack spacing={0.5}>
+                        <Typography variant="h5">Asset Report</Typography>
+                        <Typography variant="caption" color="secondary">
+                            Total Assets Tracked: {total}
+                        </Typography>
+                    </Stack>
+                </Grid>
+                <Grid>
+                    <TextField
+                        size="small"
+                        select
+                        value={value}
+                        onChange={(e) => setValue(e.target.value)}
+                    >
+                        {status.map((option) => (
+                            <MenuItem key={option.value} value={option.value}>
+                                {option.label}
+                            </MenuItem>
+                        ))}
+                    </TextField>
+                </Grid>
+            </Grid>
+
+            {/* Pass the data to the chart */}
+            <Box sx={{ pt: 1 }}>
+                <AssetChart type={value} chartData={data} />
+            </Box>
+        </>
+    );
 }

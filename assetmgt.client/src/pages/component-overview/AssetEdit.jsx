@@ -46,7 +46,7 @@ function AssetEditForm({ initialValues, onSubmit }) {
 
     const formErrors = formState.errors;
 
-
+    const token = localStorage.getItem('token');
 
     const setFormValues = React.useCallback((newFormValues) => {
 
@@ -154,7 +154,7 @@ function AssetEditForm({ initialValues, onSubmit }) {
 
 
 
-            navigate('/assets'); // <- redirect to asset list
+            navigate('/AssetReview'); // <- redirect to asset list
 
         } catch (editError) {
 
@@ -177,10 +177,10 @@ function AssetEditForm({ initialValues, onSubmit }) {
     return (
 
         <AssetForm
-
+            token={token}
             asset={formState.values}       // The values from the parent state
             onFieldChange={handleFormFieldChange} // Pass the parent's handler
-            onSuccess={() => navigate('/assets')}
+            onSuccess={() => navigate('/AssetReview')}
             submitButtonLabel="Save"
             backButtonPath={`/assets/${assetId}`}
 

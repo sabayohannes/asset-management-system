@@ -62,6 +62,12 @@ namespace AssetMgt.Server.Controllers
         [Authorize(Roles = "Admin")]
         public async Task<IActionResult> CreateAsset([FromForm] AssetDto assetDto)
         {
+            var allowedCategories = new List<string> { "software", "hardware", "other" };
+
+            if (!allowedCategories.Contains(assetDto.Category.ToLower()))
+            {
+                return BadRequest("Invalid category. Please select software, hardware, or other.");
+            }
             var existing = await _context.Assets.FirstOrDefaultAsync(a => a.SerialNumber == assetDto.SerialNumber);
             if (existing != null)
                 return Conflict("Asset with the same serial number already exists");
